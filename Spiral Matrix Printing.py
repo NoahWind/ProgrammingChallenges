@@ -11,7 +11,7 @@ import time
 i = int(input())
 
 def print_matrix(matrix, offset):
-    time.sleep(0.1)
+    time.sleep(0.05)
     os.system('cls' if os.name == 'nt' else 'clear')
     
     for row in matrix:

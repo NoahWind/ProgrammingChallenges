@@ -1,43 +1,31 @@
-import random
 import multiprocessing
 
-def simulate_blackjack(seed, big_max):
-    random.seed(seed)  # Unik seed för varje process
-    start_am = 1
-    current = start_am
-    max_amount = 0
-    x = 0
-    odds = 0.5  
-
+def append_numbers(shared_list, lock):
+    x = 1
+    i = 0
+    
     while True:
-        me = random.randint(0, 1)
-        house = random.randint(0, 1)
+        with lock:  # Förhindra race conditions
+            shared_list.append(x)
         
-        x += 1
-
-        if house == me:  # Vinst: Dubbla pengarna
-            current *= 2
-            odds *= 0.5
-        else:  # Förlust: Återställ pengar
-            if max_amount < current:
-                max_amount = current
-
-                with big_max.get_lock():  # Lås så att uppdateringar sker korrekt mellan processer
-                    if big_max.value < max_amount:
-                        big_max.value = max_amount
-                        print(f"\n[Process {seed}] Försök: {x} | Max vinst: {max_amount} | Odds: {odds}")
-
-            current = start_am
-            odds = 0.5  # Återställ oddsen
-
-def run_parallel_simulations(n_processes):
-    with multiprocessing.Manager() as manager:
-        big_max = manager.Value('i', 0)  # Delad variabel mellan processerna
-        with multiprocessing.Pool(n_processes) as pool:
-            pool.starmap(simulate_blackjack, [(i, big_max) for i in range(n_processes)])
-
-        print(f"\n=== Global Maxvinst efter {n_processes} simuleringar: {big_max.value} ===")
+        i += 1
+        if i % 10000 == 0:
+            with lock:
+                print("Listlängd:", len(shared_list))
+            i = 0
 
 if __name__ == "__main__":
-    num_simulations = 6  # Antal parallella simuleringar
-    run_parallel_simulations(num_simulations)
+    manager = multiprocessing.Manager()
+    shared_list = manager.list()  # Delad lista mellan processer
+    lock = manager.Lock()  # Lås för att förhindra race conditions
+
+    processes = []
+    num_processes = multiprocessing.cpu_count()
+
+    for _ in range(num_processes):
+        p = multiprocessing.Process(target=append_numbers, args=(shared_list, lock))
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
