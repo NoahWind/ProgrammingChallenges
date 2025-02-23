@@ -42,7 +42,7 @@ def main():
         return False           
      
 if __name__ == "__main__":
-    amount = 10000
+    amount = 1000
     succses = 0
     for i in range(amount):
         if main():
