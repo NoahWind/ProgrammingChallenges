@@ -4,7 +4,6 @@ import random
 from collections import Counter
 from itertools import combinations
 
-# === Spelkonfiguration ===
 SUITS = {'h': 'Hjärter', 's': 'Spader', 'r': 'Ruter', 'k': 'Klöver'}
 RANKS = {
     '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7,
@@ -12,7 +11,6 @@ RANKS = {
     'kn': 11, 'd': 12, 'k': 13, 'e': 14
 }
 
-# === Korttolkning ===
 def parse_card(card_str):
     if isinstance(card_str, tuple):
         return card_str
@@ -34,7 +32,6 @@ def parse_card(card_str):
 def generate_deck(exclude_cards):
     return [(s, r) for s in SUITS for r in RANKS.values() if (s, r) not in exclude_cards]
 
-# === Handutvärdering ===
 def check_straight(values):
     values = sorted(set(values), reverse=True)
     for i in range(len(values) - 4):
@@ -90,7 +87,6 @@ def best_hand(seven_cards):
 def compare_hands(h1, h2):
     return (h1 > h2) - (h1 < h2)
 
-# === Optimerad multiprocess-simulering ===
 def monte_carlo_worker_fast(args):
     hand, board, deck, num_opponents = args
     random.shuffle(deck)
@@ -118,7 +114,6 @@ def parallel_multi_player_simulation_fast(player_hand, board, num_players=5, sim
     ties = sum(1 for r in results if r == 0)
     return 100 * wins / simulations, 100 * ties / simulations
 
-# === Kompatibel wrapper ===
 def parallel_multi_player_simulation(player_hand, board, num_players=5, simulations=10000, processes=6):
     encoded_hand = [parse_card(c) for c in player_hand]
     encoded_board = [parse_card(c) for c in board]

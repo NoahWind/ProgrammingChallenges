@@ -35,7 +35,4 @@ def count_eatable_chocolates(a, b):
     
     return(eaten)
 
-print(count_eatable_chocolates("4$", "1$"))
-print(count_eatable_chocolates("55   $", "5$"))
-print(count_eatable_chocolates("I have 68$", "2$"))
-print(count_eatable_chocolates("I got -68$ from my mom ", "2$"))
+print(count_eatable_chocolates("40$", "1$"))
