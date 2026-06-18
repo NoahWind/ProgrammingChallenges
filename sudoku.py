@@ -28,7 +28,6 @@ def get_free_cors(board):
 
     return free_cords
 
-
 box = 3
 width = box * 3
 
