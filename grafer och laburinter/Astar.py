@@ -11,53 +11,45 @@ edges = []
 
 import matplotlib.pyplot as plt
 
-# Här sparar vi en "snapshot" av varje steg algoritmen tar
 search_history = []
 
 def spela_upp_sokning(start, end, hittade_vag):
-    plt.ion() # Starta interaktivt läge för animation
+    plt.ion() 
     plt.figure(figsize=(9, 9))
     
-    # Lista för att hålla koll på alla unika noder vi hittills har testat (för att färga dem gula)
     besökta_noder = set()
 
     for steg_nummer, steg in enumerate(search_history):
-        plt.clf() # Rensa skärmen för nästa bildruta
+        plt.clf()
         
         aktiv_nod = steg['current']
         aktuell_vag = steg['passed']
         besökta_noder.add(aktiv_nod)
         
-        # 1. Rita alla nätverkets kanter i ljusgrått
         for edge in edges:
             n1 = nodes[edge[0]]
             n2 = nodes[edge[1]]
             plt.plot([n1[NX], n2[NX]], [n1[NY], n2[NY]], color="#e0e0e0", zorder=1)
             
-        # 2. Rita alla noder som hittills har prövats (Gula)
         for node_id in besökta_noder:
             n = nodes[node_id]
             plt.scatter(n[NX], n[NY], color="gold", s=150, zorder=2)
             
-        # 3. Rita den aktiva vägen just i detta steg (Grön linje)
         if len(aktuell_vag) > 1:
             for i in range(len(aktuell_vag) - 1):
                 n1 = aktuell_vag[i]
                 n2 = aktuell_vag[i+1]
                 plt.plot([n1[NX], n2[NX]], [n1[NY], n2[NY]], color="limegreen", linewidth=3, zorder=3)
                 
-        # 4. Rita alla vanliga noder (Blå) och deras ID-nummer
         for n in nodes:
             plt.scatter(n[NX], n[NY], color="royalblue", s=80, zorder=4)
             plt.text(n[NX]+1, n[NY]+1, str(n[ID]), fontsize=9, weight='bold')
 
-        # 5. Markera Start (Grön) och Mål (Röd) extra stort
         ns = nodes[start]
         ne = nodes[end]
         plt.scatter(ns[NX], ns[NY], color="limegreen", s=200, edgecolors="black", zorder=5)
         plt.scatter(ne[NX], ne[NY], color="crimson", s=200, edgecolors="black", zorder=5)
         
-        # 6. Markera var algoritmens "huvud" stod i detta steg (Orange ring)
         if aktiv_nod is not None:
             nc = nodes[aktiv_nod]
             plt.scatter(nc[NX], nc[NY], color="orange", s=250, edgecolors="black", linewidth=2, zorder=6)
@@ -66,11 +58,9 @@ def spela_upp_sokning(start, end, hittade_vag):
         plt.xlim(-5, X + 5)
         plt.ylim(-5, Y + 5)
         
-        plt.pause(0.3) # Hastighet på animationen (0.3 sekunder per steg)
+        plt.pause(0.3)
 
-    # När hela historiken visats, visa slutresultatet permanent
     plt.clf()
-    # Rita om allt en sista gång med den slutgiltiga stigen om vi hittade en
     for edge in edges:
         plt.plot([nodes[edge[0]][NX], nodes[edge[1]][NX]], [nodes[edge[0]][NY], nodes[edge[1]][NY]], color="#ddd", zorder=1)
     for n in nodes:
@@ -149,7 +139,6 @@ def alredy_been(options, passed):
 def sort_after_shortest(current):
     options = []
     for obj in edges:
-        #print(obj[0], obj[1], current)
 
         if obj[0] == current:
             options.append(obj)
@@ -159,7 +148,6 @@ def sort_after_shortest(current):
     return options
 
 def A_start(current, passed, start, end):
-    # Spara en ögonblicksbild av det här steget i historiken (kopiera listan med list())
     search_history.append({'current': current, 'passed': list(passed)})
 
     if current == end:
@@ -177,7 +165,6 @@ def A_start(current, passed, start, end):
             return True
             
         passed.pop(-1)
-        # Spara även steget när vi backtrackar (så vi ser att den backar!)
         search_history.append({'current': current, 'passed': list(passed)})
         
     return False
