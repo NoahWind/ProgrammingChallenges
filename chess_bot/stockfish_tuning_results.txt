@@ -1,0 +1,440 @@
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 3.0099055684669382
+CONTROL_CENTER_BONUS: 0.5969455787612938
+BREAKING_PAWN_CHAINS_BONUS: 4.0199586257118
+bishop_pair_bonus: 4.375660337973007
+knight_on_the_rim_penalty: 0.44614120618015585
+pawn_chain_bonus: 0.4576006817861764
+PASSED_PAWN_BONUS: 2.32032256547225
+enemy_king_corner_bonus: 1.0016129089693897
+enemy_king_center_bonus: 1.3058046656945705
+hanging_piece_penalty: 0.5148614993478946
+squares_controlled_bonus: 0.020947969748648265
+pieac_pos_bonus: 0.08681509566337581
+OPEN_RATE: 0.2906988516922878
+END_RATE: 0.14805769620606649
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 6.681568162606719
+CONTROL_CENTER_BONUS: 4.392407511425438
+BREAKING_PAWN_CHAINS_BONUS: 1.5557543631194006
+bishop_pair_bonus: 2.0025298647020753
+knight_on_the_rim_penalty: 0.6183136923562285
+pawn_chain_bonus: 0.3637130059067797
+PASSED_PAWN_BONUS: 4.50581326097045
+enemy_king_corner_bonus: 0.5100988988919802
+enemy_king_center_bonus: 2.6201551455880896
+hanging_piece_penalty: 1.4515839184417854
+squares_controlled_bonus: 0.013686465795132594
+pieac_pos_bonus: 0.047236063188859874
+OPEN_RATE: 0.18714266418309516
+END_RATE: 0.259958769832133
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 9.50464111320862
+CONTROL_CENTER_BONUS: 3.387334815975103
+BREAKING_PAWN_CHAINS_BONUS: 2.8848419607991787
+bishop_pair_bonus: 0.6490965223303824
+knight_on_the_rim_penalty: 1.9130191132008318
+pawn_chain_bonus: 1.848230801235245
+PASSED_PAWN_BONUS: 1.3641923080853917
+enemy_king_corner_bonus: 3.4274398366183445
+enemy_king_center_bonus: 1.3237714330119759
+hanging_piece_penalty: 3.5525328276451473
+squares_controlled_bonus: 0.06414226061971154
+pieac_pos_bonus: 0.09725998714579806
+OPEN_RATE: 0.8989824647467174
+END_RATE: 0.709020706301414
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 9.496935255556393
+CONTROL_CENTER_BONUS: 4.228667161936129
+BREAKING_PAWN_CHAINS_BONUS: 0.10116300436884942
+bishop_pair_bonus: 0.48852432327682405
+knight_on_the_rim_penalty: 3.9285668661051436
+pawn_chain_bonus: 0.9024971704828343
+PASSED_PAWN_BONUS: 4.743134312087776
+enemy_king_corner_bonus: 1.3588707707900514
+enemy_king_center_bonus: 0.29555963709133043
+hanging_piece_penalty: 2.8769693915791343
+squares_controlled_bonus: 0.05133887089956918
+pieac_pos_bonus: 0.022657363736187895
+OPEN_RATE: 0.2717745298248791
+END_RATE: 0.1502984359929621
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 5.434210002089519
+CONTROL_CENTER_BONUS: 2.6653850324764736
+BREAKING_PAWN_CHAINS_BONUS: 2.546179429429785
+bishop_pair_bonus: 4.808342922425918
+knight_on_the_rim_penalty: 3.4548907915223555
+pawn_chain_bonus: 3.727562647818608
+PASSED_PAWN_BONUS: 2.7830138981857835
+enemy_king_corner_bonus: 4.231162042945739
+enemy_king_center_bonus: 1.7098609519098922
+hanging_piece_penalty: 3.533795739535508
+squares_controlled_bonus: 0.02115419975000354
+pieac_pos_bonus: 0.06569488400711658
+OPEN_RATE: 0.4022150307614816
+END_RATE: 0.8829808080293357
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 8.824211745108633
+CONTROL_CENTER_BONUS: 0.7503708430703673
+BREAKING_PAWN_CHAINS_BONUS: 2.1152961451495456
+bishop_pair_bonus: 0.7522274065198127
+knight_on_the_rim_penalty: 1.2099276991826295
+pawn_chain_bonus: 0.2327580711611945
+PASSED_PAWN_BONUS: 3.3086945460980304
+enemy_king_corner_bonus: 4.8958884484368745
+enemy_king_center_bonus: 3.3114251804280013
+hanging_piece_penalty: 0.2507125279104766
+squares_controlled_bonus: 0.054628053561600415
+pieac_pos_bonus: 0.022866520014475776
+OPEN_RATE: 0.18126736852062775
+END_RATE: 0.6306184804142235
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 2.5093978660092935
+CONTROL_CENTER_BONUS: 1.323663887610092
+BREAKING_PAWN_CHAINS_BONUS: 4.000315484049703
+bishop_pair_bonus: 0.8080528131356127
+knight_on_the_rim_penalty: 3.3127567503467286
+pawn_chain_bonus: 0.29648944507688113
+PASSED_PAWN_BONUS: 2.9189304212735587
+enemy_king_corner_bonus: 0.565841204543293
+enemy_king_center_bonus: 4.067255483553199
+hanging_piece_penalty: 2.1476538043666378
+squares_controlled_bonus: 0.023533489273899016
+pieac_pos_bonus: 0.0869715089209125
+OPEN_RATE: 0.9538494662874761
+END_RATE: 0.10613717049910687
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 7.121408982148327
+CONTROL_CENTER_BONUS: 4.749566578898463
+BREAKING_PAWN_CHAINS_BONUS: 0.4144208863647131
+bishop_pair_bonus: 1.3984692566649448
+knight_on_the_rim_penalty: 2.5057495852337066
+pawn_chain_bonus: 0.4649085016522013
+PASSED_PAWN_BONUS: 4.688972819051705
+enemy_king_corner_bonus: 1.4263206095789864
+enemy_king_center_bonus: 0.6322123884110452
+hanging_piece_penalty: 0.8915176629488248
+squares_controlled_bonus: 0.0922315687132816
+pieac_pos_bonus: 0.09284953005002776
+OPEN_RATE: 0.7376410981526759
+END_RATE: 0.17755455469603337
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 9.995113582954469
+CONTROL_CENTER_BONUS: 1.5048004555450452
+BREAKING_PAWN_CHAINS_BONUS: 1.3917589020712264
+bishop_pair_bonus: 1.7790548001778483
+knight_on_the_rim_penalty: 1.2968657502006111
+pawn_chain_bonus: 0.8108270598565487
+PASSED_PAWN_BONUS: 4.630735989519981
+enemy_king_corner_bonus: 4.905701292387241
+enemy_king_center_bonus: 4.2791255871191485
+hanging_piece_penalty: 0.4780861919288918
+squares_controlled_bonus: 0.021824389404885174
+pieac_pos_bonus: 0.04344798650684446
+OPEN_RATE: 0.6739659389135518
+END_RATE: 0.33346721182214206
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 2.6095970881058204
+CONTROL_CENTER_BONUS: 4.248130716699186
+BREAKING_PAWN_CHAINS_BONUS: 2.3219258389149218
+bishop_pair_bonus: 0.12896430430142547
+knight_on_the_rim_penalty: 4.255600014762242
+pawn_chain_bonus: 3.622137522789526
+PASSED_PAWN_BONUS: 1.5260142756768975
+enemy_king_corner_bonus: 1.6647182189877174
+enemy_king_center_bonus: 0.7781655692046814
+hanging_piece_penalty: 2.9856694012084746
+squares_controlled_bonus: 0.03308329578114075
+pieac_pos_bonus: 0.03635367425378279
+OPEN_RATE: 0.475169328524759
+END_RATE: 0.5554850359566536
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 2.9140957701683803
+CONTROL_CENTER_BONUS: 1.8287081865810106
+BREAKING_PAWN_CHAINS_BONUS: 1.8125546264424084
+bishop_pair_bonus: 3.7477424128080656
+knight_on_the_rim_penalty: 2.8163642083310942
+pawn_chain_bonus: 2.226433801875282
+PASSED_PAWN_BONUS: 4.598956020294392
+enemy_king_corner_bonus: 2.760834305249639
+enemy_king_center_bonus: 3.5546131117275017
+hanging_piece_penalty: 1.5804231292229904
+squares_controlled_bonus: 0.06657777667559175
+pieac_pos_bonus: 0.045305935681905746
+OPEN_RATE: 0.1798594836214104
+END_RATE: 0.3714268468868419
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 1.9882843566887551
+CONTROL_CENTER_BONUS: 3.552606168180362
+BREAKING_PAWN_CHAINS_BONUS: 1.9455910558419063
+bishop_pair_bonus: 1.8634945200775614
+knight_on_the_rim_penalty: 2.3022625788773556
+pawn_chain_bonus: 2.9709657823316045
+PASSED_PAWN_BONUS: 1.345825069845434
+enemy_king_corner_bonus: 3.6265470426261954
+enemy_king_center_bonus: 0.35769210524753137
+hanging_piece_penalty: 1.4218841432754994
+squares_controlled_bonus: 0.01022982190462421
+pieac_pos_bonus: 0.06613570765944277
+OPEN_RATE: 0.8473394354575347
+END_RATE: 0.6297261837389452
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 8.4819181585808
+CONTROL_CENTER_BONUS: 2.755007942951484
+BREAKING_PAWN_CHAINS_BONUS: 2.686223828340525
+bishop_pair_bonus: 3.178551629177087
+knight_on_the_rim_penalty: 2.8830395649795086
+pawn_chain_bonus: 4.268563033948474
+PASSED_PAWN_BONUS: 4.2962012358394395
+enemy_king_corner_bonus: 2.349044170419203
+enemy_king_center_bonus: 0.9263647991155287
+hanging_piece_penalty: 1.945506971125423
+squares_controlled_bonus: 0.031004278161804608
+pieac_pos_bonus: 0.04323664045831435
+OPEN_RATE: 0.2314911817299533
+END_RATE: 0.2771247865698807
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 1.6682643358477562
+CONTROL_CENTER_BONUS: 4.1239931845051485
+BREAKING_PAWN_CHAINS_BONUS: 2.253540956558016
+bishop_pair_bonus: 4.46503646955634
+knight_on_the_rim_penalty: 1.914823715428416
+pawn_chain_bonus: 2.734948959700814
+PASSED_PAWN_BONUS: 4.009571291572708
+enemy_king_corner_bonus: 2.7896936285528833
+enemy_king_center_bonus: 3.2131252084128623
+hanging_piece_penalty: 1.6389506861588994
+squares_controlled_bonus: 0.05506122514297599
+pieac_pos_bonus: 0.012045817781029882
+OPEN_RATE: 0.5734162587264919
+END_RATE: 0.5070576814217457
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 9.043536294302463
+CONTROL_CENTER_BONUS: 1.106162272240202
+BREAKING_PAWN_CHAINS_BONUS: 4.565601190645741
+bishop_pair_bonus: 0.7583904553765162
+knight_on_the_rim_penalty: 3.4175866544560636
+pawn_chain_bonus: 1.7989441588153792
+PASSED_PAWN_BONUS: 1.8581632419826168
+enemy_king_corner_bonus: 0.2484461119616483
+enemy_king_center_bonus: 3.553761844560269
+hanging_piece_penalty: 3.9635692296378133
+squares_controlled_bonus: 0.01204525822273819
+pieac_pos_bonus: 0.024810454364378454
+OPEN_RATE: 0.7937345937810016
+END_RATE: 0.40406614146196673
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 1.0549809443105638
+CONTROL_CENTER_BONUS: 1.5750390046018452
+BREAKING_PAWN_CHAINS_BONUS: 3.9867944789294465
+bishop_pair_bonus: 1.5686725564000703
+knight_on_the_rim_penalty: 4.2356944501376
+pawn_chain_bonus: 2.4050810645442757
+PASSED_PAWN_BONUS: 3.691727320741332
+enemy_king_corner_bonus: 2.5988380826982707
+enemy_king_center_bonus: 3.629794299403334
+hanging_piece_penalty: 1.6013147911862224
+squares_controlled_bonus: 0.07488574817516952
+pieac_pos_bonus: 0.09747393984647618
+OPEN_RATE: 0.8436564946907644
+END_RATE: 0.4741758857958258
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 2.56873920400199
+CONTROL_CENTER_BONUS: 1.792705516288462
+BREAKING_PAWN_CHAINS_BONUS: 4.161363841970887
+bishop_pair_bonus: 3.3888941248785627
+knight_on_the_rim_penalty: 2.0581173052950614
+pawn_chain_bonus: 4.44194868605804
+PASSED_PAWN_BONUS: 4.621257563340604
+enemy_king_corner_bonus: 1.9774819431925168
+enemy_king_center_bonus: 4.2158410937287085
+hanging_piece_penalty: 3.7080556331443204
+squares_controlled_bonus: 0.04074628344022177
+pieac_pos_bonus: 0.07495242182116803
+OPEN_RATE: 0.30999618339232565
+END_RATE: 0.5619292982040505
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 6.835754170067531
+CONTROL_CENTER_BONUS: 4.866207903117429
+BREAKING_PAWN_CHAINS_BONUS: 3.3472299821658162
+bishop_pair_bonus: 3.9432764552741273
+knight_on_the_rim_penalty: 1.4320731130638624
+pawn_chain_bonus: 1.8802370027591047
+PASSED_PAWN_BONUS: 0.44910703676502206
+enemy_king_corner_bonus: 0.714014097370702
+enemy_king_center_bonus: 1.7047161793269205
+hanging_piece_penalty: 2.5616805391346404
+squares_controlled_bonus: 0.090544551666618
+pieac_pos_bonus: 0.038830967170199356
+OPEN_RATE: 0.1691661302740813
+END_RATE: 0.3806552331757631
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 3.612346547232228
+CONTROL_CENTER_BONUS: 4.2010068647077095
+BREAKING_PAWN_CHAINS_BONUS: 4.50729475124115
+bishop_pair_bonus: 3.8747093774809565
+knight_on_the_rim_penalty: 4.969223976544358
+pawn_chain_bonus: 3.0753070935149016
+PASSED_PAWN_BONUS: 2.8111642323958224
+enemy_king_corner_bonus: 1.9105376638753895
+enemy_king_center_bonus: 3.3892447186812515
+hanging_piece_penalty: 4.571470352259628
+squares_controlled_bonus: 0.059758712588454846
+pieac_pos_bonus: 0.0647722295341722
+OPEN_RATE: 0.921626012539452
+END_RATE: 0.7781985600728246
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 4.494627211480794
+CONTROL_CENTER_BONUS: 1.7144827504007063
+BREAKING_PAWN_CHAINS_BONUS: 3.870668028697463
+bishop_pair_bonus: 4.71431020913723
+knight_on_the_rim_penalty: 4.403487022973946
+pawn_chain_bonus: 4.453331102179293
+PASSED_PAWN_BONUS: 3.1149103411415737
+enemy_king_corner_bonus: 3.007751291026078
+enemy_king_center_bonus: 2.7110903687396735
+hanging_piece_penalty: 4.606933757404408
+squares_controlled_bonus: 0.05550672736066809
+pieac_pos_bonus: 0.06033278044976352
+OPEN_RATE: 0.376698234207012
+END_RATE: 0.9882840248390273
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 2.945446263443337
+CONTROL_CENTER_BONUS: 1.2948470568759147
+BREAKING_PAWN_CHAINS_BONUS: 1.8348479349280558
+bishop_pair_bonus: 0.4951063455240349
+knight_on_the_rim_penalty: 1.559499772211935
+pawn_chain_bonus: 1.06075655665731
+PASSED_PAWN_BONUS: 1.6656503010790538
+enemy_king_corner_bonus: 4.169398964839071
+enemy_king_center_bonus: 2.4262082359906985
+hanging_piece_penalty: 0.41749967242917463
+squares_controlled_bonus: 0.02301907973534873
+pieac_pos_bonus: 0.0350004136300433
+OPEN_RATE: 0.4663031486055803
+END_RATE: 0.3637554365312865
+
+==================================================
+Matchdatum: 2026.07.22
+Slutresultat: Vår Motor 0.0 - 2.0 Stockfish
+
+=== Använda Parametrar ===
+KING_SAFETY_BONUS: 6.819355980633791
+CONTROL_CENTER_BONUS: 1.7584454828097398
+BREAKING_PAWN_CHAINS_BONUS: 1.475000970147981
+bishop_pair_bonus: 2.461172382759074
+knight_on_the_rim_penalty: 1.8348453909046127
+pawn_chain_bonus: 2.444142820362211
+PASSED_PAWN_BONUS: 1.9077378746823097
+enemy_king_corner_bonus: 4.688392230390701
+enemy_king_center_bonus: 4.643439337864044
+hanging_piece_penalty: 1.5719244782050275
+squares_controlled_bonus: 0.08639104121951545
+pieac_pos_bonus: 0.029661388030059306
+OPEN_RATE: 0.716201002780422
+END_RATE: 0.46986552396937675

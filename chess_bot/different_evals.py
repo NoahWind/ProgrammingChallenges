@@ -120,8 +120,8 @@ WHITE_PIECES = {'♙', '♘', '♗', '♕', '♖', '♔'}
 
 cache = {}
 search_start_time = 0
-time_limit_seconds = 0.0005
-DEFAULT_TIME_LIMIT_SECONDS = 0.5
+time_limit_seconds = 0.000005
+DEFAULT_TIME_LIMIT_SECONDS = 5
 
 
 # ==========================================
@@ -291,18 +291,21 @@ def breakt_pawn_chains(board, color, state):
     return False
 
 def how_many_squares_do_i_control(board, color, state):
-    controlled_squares = set()
+    # get_all_legal_moves beror bara på board/state/color - inte på vilken
+    # egen pjäs vi råkar loopa över just nu, så den ska bara anropas EN gång
+    # totalt, inte en gång per egen pjäs (var tidigare upp till ~16x dyrare
+    # än nödvändigt, eftersom hela draglistan räknades om för varje pjäs
+    # bara för att filtreras ner till en enda pjäs drag).
+    moves = get_all_legal_moves(color, board, state)
+
     own_pieces = state.white_pieces if color == 'white' else state.black_pieces
-    
-    for r, c in own_pieces:
-        piece = board[r][c]
-        if piece != ' ':
-            moves = get_all_legal_moves(color, board, state)
-            for move in moves:
-                (sr, sc), (er, ec) = move
-                if (sr, sc) == (r, c):
-                    controlled_squares.add((er, ec))
-    
+    own_piece_squares = {(r, c) for r, c in own_pieces if board[r][c] != ' '}
+
+    controlled_squares = set()
+    for (sr, sc), (er, ec) in moves:
+        if (sr, sc) in own_piece_squares:
+            controlled_squares.add((er, ec))
+
     return len(controlled_squares)
 
 def three_fold_repetition(history, board, current_color, state):
@@ -451,5 +454,3 @@ def hanging_pieces_penalty(board, color, state):
 
     # Returnera negativt för vit (sänker vits poäng) och positivt för svart (höjer fördel svart)
     return -penalty if color == 'white' else penalty
-
-

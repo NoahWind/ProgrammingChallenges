@@ -1,0 +1,17 @@
+# Bruteforce optimerade parametrar
+best_params = {
+    "BREAKING_PAWN_CHAINS_BONUS": 0.5415,
+    "CONTROL_CENTER_BONUS": 155.9284,
+    "END_RATE": 0.3995,
+    "KING_SAFETY_BONUS": 284.3546,
+    "OPEN_RATE": 0.6813,
+    "PASSED_PAWN_BONUS": 44.6591,
+    "bishop_pair_bonus": 13.9089,
+    "enemy_king_center_bonus": 60.8776,
+    "enemy_king_corner_bonus": 54.5418,
+    "hanging_piece_penalty": 163.3152,
+    "knight_on_the_rim_penalty": 154.8911,
+    "pawn_chain_bonus": 0.0542,
+    "pieac_pos_bonus": 9.5524,
+    "squares_controlled_bonus": 9.4062,
+}

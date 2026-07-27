@@ -42,21 +42,22 @@ from chess_rules import get_all_legal_moves, get_location_of_all_pieces, is_chec
 
 from different_evals import *
 
-KING_SAFETY_BONUS = 5
-CONTROL_CENTER_BONUS = 0.5
-BREAKING_PAWN_CHAINS_BONUS = 1
-bishop_pair_bonus = 0.5
-knight_on_the_rim_penalty = 0.5
-pawn_chain_bonus = 2
-PASSED_PAWN_BONUS = 0.5
-enemy_king_corner_bonus = 1
-enemy_king_center_bonus= 0.5
-hanging_piece_penalty = 0.5
-squares_controlled_bonus = 0.01
-pieac_pos_bonus = 0.01
-OPEN_RATE = 0.6
-END_RATE = 0.6
-
+ENGINE_PARAMS = {
+    "KING_SAFETY_BONUS": 5,
+    "CONTROL_CENTER_BONUS": 0.5,
+    "BREAKING_PAWN_CHAINS_BONUS": 1,
+    "bishop_pair_bonus": 0.5,
+    "knight_on_the_rim_penalty": 0.5,
+    "pawn_chain_bonus": 2,
+    "PASSED_PAWN_BONUS": 0.5,
+    "enemy_king_corner_bonus": 1,
+    "enemy_king_center_bonus": 0.5,
+    "hanging_piece_penalty": 0.5,
+    "squares_controlled_bonus": 0.01,
+    "pieac_pos_bonus": 0.01,
+    "OPEN_RATE": 0.6,
+    "END_RATE": 0.6
+}
 def _has_any_pawns(board):
     return any(piece in ('♙', '♟') for row in board for piece in row)
 
@@ -83,8 +84,10 @@ def get_game_phase_weights(state, open_rate=0.6, end_rate=0.6):
     
     return a, b, c
 
-def evaluate_board(board, state, history, current_color):
+def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PARAMS):
     score = float(state.material_score)
+
+
     
     pos_key = get_position_hash(board, current_color, state)
     if (history.get(pos_key, 0) >= 2
@@ -92,7 +95,7 @@ def evaluate_board(board, state, history, current_color):
             and not _has_any_pawns(board)):
         return 0 
     
-    a, b, c = get_game_phase_weights(state, OPEN_RATE, END_RATE)
+    a, b, c = get_game_phase_weights(state, ENGINE_PARAMS["OPEN_RATE"], ENGINE_PARAMS["END_RATE"])
 
     if state.half_move_clock > 80:
         if score < 0:
@@ -100,39 +103,42 @@ def evaluate_board(board, state, history, current_color):
         elif score > 0:
             score -= (state.half_move_clock - 80) * 0.5
     
-    if is_king_safe(board, 'white', state): score += KING_SAFETY_BONUS * a + KING_SAFETY_BONUS * b + KING_SAFETY_BONUS * c
-    if is_king_safe(board, 'black', state): score -= KING_SAFETY_BONUS * a + KING_SAFETY_BONUS * b + KING_SAFETY_BONUS * c
+    if is_king_safe(board, 'white', state): score += ENGINE_PARAMS["KING_SAFETY_BONUS"] * a + ENGINE_PARAMS["KING_SAFETY_BONUS"] * b + ENGINE_PARAMS["KING_SAFETY_BONUS"] * c
+    if is_king_safe(board, 'black', state): score -= ENGINE_PARAMS["KING_SAFETY_BONUS"] * a + ENGINE_PARAMS["KING_SAFETY_BONUS"] * b + ENGINE_PARAMS["KING_SAFETY_BONUS"] * c
 
-    if is_controling_center(board, 'white'): score += CONTROL_CENTER_BONUS  * a + CONTROL_CENTER_BONUS * b + CONTROL_CENTER_BONUS * c
-    if is_controling_center(board, 'black'): score -= CONTROL_CENTER_BONUS * a + CONTROL_CENTER_BONUS * b + CONTROL_CENTER_BONUS * c
+    if is_controling_center(board, 'white'): score += ENGINE_PARAMS["CONTROL_CENTER_BONUS"]  * a + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * b + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * c
+    if is_controling_center(board, 'black'): score -= ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * a + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * b + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * c
 
-    if breakt_pawn_chains(board, 'white', state): score -= BREAKING_PAWN_CHAINS_BONUS * a + BREAKING_PAWN_CHAINS_BONUS * b + BREAKING_PAWN_CHAINS_BONUS * c
-    if breakt_pawn_chains(board, 'black', state): score += BREAKING_PAWN_CHAINS_BONUS * a + BREAKING_PAWN_CHAINS_BONUS * b + BREAKING_PAWN_CHAINS_BONUS * c
+    if breakt_pawn_chains(board, 'white', state): score -= ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * a + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * b + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * c
+    if breakt_pawn_chains(board, 'black', state): score += ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * a + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * b + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * c
 
-    if bishop_pair(board, 'white', state): score += bishop_pair_bonus * a + bishop_pair_bonus * b + bishop_pair_bonus * c
-    if bishop_pair(board, 'black', state): score -= bishop_pair_bonus * a + bishop_pair_bonus * b + bishop_pair_bonus * c
+    if bishop_pair(board, 'white', state): score += ENGINE_PARAMS["bishop_pair_bonus"] * a + ENGINE_PARAMS["bishop_pair_bonus"] * b + ENGINE_PARAMS["bishop_pair_bonus"] * c
+    if bishop_pair(board, 'black', state): score -= ENGINE_PARAMS["bishop_pair_bonus"] * a + ENGINE_PARAMS["bishop_pair_bonus"] * b + ENGINE_PARAMS["bishop_pair_bonus"] * c
 
-    if knight_on_the_rim(board, 'white', state): score -= knight_on_the_rim_penalty * a + knight_on_the_rim_penalty * b + knight_on_the_rim_penalty * c
-    if knight_on_the_rim(board, 'black', state): score += knight_on_the_rim_penalty * a + knight_on_the_rim_penalty * b + knight_on_the_rim_penalty * c
+    if knight_on_the_rim(board, 'white', state): score -= ENGINE_PARAMS["knight_on_the_rim_penalty"] * a + ENGINE_PARAMS["knight_on_the_rim_penalty"] * b + ENGINE_PARAMS["knight_on_the_rim_penalty"] * c
+    if knight_on_the_rim(board, 'black', state): score += ENGINE_PARAMS["knight_on_the_rim_penalty"] * a + ENGINE_PARAMS["knight_on_the_rim_penalty"] * b + ENGINE_PARAMS["knight_on_the_rim_penalty"] * c
 
-    if how_many_squares_do_i_control(board, 'white', state): score += squares_controlled_bonus * how_many_squares_do_i_control(board, 'white', state) * a + squares_controlled_bonus * how_many_squares_do_i_control(board, 'white', state) * b + squares_controlled_bonus * how_many_squares_do_i_control(board, 'white', state) * c
-    if how_many_squares_do_i_control(board, 'black', state): score -= squares_controlled_bonus * how_many_squares_do_i_control(board, 'black', state) * a + squares_controlled_bonus * how_many_squares_do_i_control(board, 'black', state) * b + squares_controlled_bonus * how_many_squares_do_i_control(board, 'black', state) * c
+    black_sqr = how_many_squares_do_i_control(board, 'black', state)
+    white_sqr = how_many_squares_do_i_control(board, 'white', state)
+
+    if black_sqr > 0: score -= ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * a + ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * b + ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * c
+    if white_sqr > 0: score += ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * a + ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * b + ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * c
 
     pst_w, hang_w = evaluate_pieces_and_threats(board, state, 'white')
     pst_b, hang_b = evaluate_pieces_and_threats(board, state, 'black')
 
-    score += pst_w * pieac_pos_bonus * a + pst_w * pieac_pos_bonus * b + pst_w * pieac_pos_bonus * c
-    score += pst_b * pieac_pos_bonus * a + pst_b * pieac_pos_bonus * b + pst_b * pieac_pos_bonus * c
-    score += hang_w * hanging_piece_penalty * a + hang_w * hanging_piece_penalty * b + hang_w * hanging_piece_penalty * c
-    score += hang_b * hanging_piece_penalty * a + hang_b * hanging_piece_penalty * b + hang_b * hanging_piece_penalty * c
+    score += pst_w * ENGINE_PARAMS["pieac_pos_bonus"] * a + pst_w * ENGINE_PARAMS["pieac_pos_bonus"] * b + pst_w * ENGINE_PARAMS["pieac_pos_bonus"] * c
+    score += pst_b * ENGINE_PARAMS["pieac_pos_bonus"] * a + pst_b * ENGINE_PARAMS["pieac_pos_bonus"] * b + pst_b * ENGINE_PARAMS["pieac_pos_bonus"] * c
+    score += hang_w * ENGINE_PARAMS["hanging_piece_penalty"] * a + hang_w * ENGINE_PARAMS["hanging_piece_penalty"] * b + hang_w * ENGINE_PARAMS["hanging_piece_penalty"] * c
+    score += hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * a + hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * b + hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * c
 
 
     score += passed_pawn_score(board, 'white', state)
     score += passed_pawn_score(board, 'black', state)
 
     # Pawn chains returnerar bara True/False, så där behåller vi if-satsen
-    if pawn_chain(board, 'white', state): score += pawn_chain_bonus
-    if pawn_chain(board, 'black', state): score -= pawn_chain_bonus
+    if pawn_chain(board, 'white', state): score += ENGINE_PARAMS["pawn_chain_bonus"]
+    if pawn_chain(board, 'black', state): score -= ENGINE_PARAMS["pawn_chain_bonus"]
 
     # Här lägger vi till returvärdena direkt (de hanterar redan +/- beroende på färg)
     score += endgame_push_king_enemy_to_corner(board, 'white', state)
@@ -204,7 +210,7 @@ def _terminal_score(current_color, depth=0):
     magnitude = 1_000_000 + depth
     return -magnitude if current_color == 'white' else magnitude
 
-def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth=0):
+def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth=0, ENGINE_PARAMS=ENGINE_PARAMS):
     # BUGGFIX: quiescence_search saknade helt tidsgränskoll. Vid långa
     # forcerande slagserier kunde ett enskilt drag därför ta betydligt
     # längre tid än DEFAULT_TIME_LIMIT_SECONDS, eftersom minimax bara
@@ -220,7 +226,7 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
         return _terminal_score(current_color, -q_depth) if is_check(board, current_color, state) else 0
 
     # Nu skickar vi med history och current_color till evaluate_board
-    stand_pat = evaluate_board(board, state, history, current_color)
+    stand_pat = evaluate_board(board, state, history, current_color, ENGINE_PARAMS)
 
     if is_maximizing:
         if stand_pat >= beta: return beta
@@ -241,7 +247,7 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
             record = apply_move(board, state, move[0], move[1])
             try:
                 # Skicka med history även här!
-                eval_val = quiescence_search(board, state, alpha, beta, False, history, q_depth + 1)
+                eval_val = quiescence_search(board, state, alpha, beta, False, history, q_depth + 1, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
             if eval_val >= beta: return beta
@@ -252,7 +258,7 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
             record = apply_move(board, state, move[0], move[1])
             try:
                 # Skicka med history även här!
-                eval_val = quiescence_search(board, state, alpha, beta, True, history, q_depth + 1)
+                eval_val = quiescence_search(board, state, alpha, beta, True, history, q_depth + 1, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
             if eval_val <= alpha: return alpha
@@ -272,7 +278,7 @@ def get_position_hash(board, color, state):
     board_tuple = tuple(tuple(row) for row in board)
     return (board_tuple, color, state_key)
 
-def minimax(board, state, depth, alpha, beta, is_maximizing, history):
+def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PARAMS=ENGINE_PARAMS):
     if time.time() - search_start_time > time_limit_seconds:
         raise TimeoutError()
 
@@ -311,7 +317,7 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history):
                 return cached_eval
 
     if depth == 0:
-        result = quiescence_search(board, state, alpha, beta, is_maximizing, history, 0)
+        result = quiescence_search(board, state, alpha, beta, is_maximizing, history, 0, ENGINE_PARAMS)
         if use_cache:
             cache[board_hash] = (result, depth, 'EXACT')
         history[board_hash] -= 1
@@ -324,7 +330,7 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history):
         for move in moves:
             record = apply_move(board, state, move[0], move[1])
             try:
-                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history)
+                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
             max_eval = max(max_eval, eval_val)
@@ -345,7 +351,7 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history):
         for move in moves:
             record = apply_move(board, state, move[0], move[1])
             try:
-                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history)
+                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
             min_eval = min(min_eval, eval_val)
@@ -361,7 +367,8 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history):
             cache[board_hash] = (min_eval, depth, node_type)
         history[board_hash] -= 1
         return min_eval
-def get_best_move(board, depth, color, state, history=None):
+    
+def get_best_move(board, depth, color, state, history=None, params=None):
     global cache, search_start_time, time_limit_seconds
 
     search_start_time = time.time()
@@ -371,6 +378,10 @@ def get_best_move(board, depth, color, state, history=None):
 
     if history is None:
         history = {}
+        
+    # LÄGG TILL DETTA: Om ingen parameter skickas in, använd standard-dictionaryn
+    if params is None:
+        params = ENGINE_PARAMS
         
     moves = get_all_legal_moves(color, board, state)
     if not moves:
@@ -395,7 +406,8 @@ def get_best_move(board, depth, color, state, history=None):
             for move in moves:
                 record = apply_move(board, state, move[0], move[1])
                 try:
-                    move_value = minimax(board, state, current_depth - 1, alpha, beta, not is_white_turn, history)
+                    # HÄR ÄR ÄNDRINGEN: Skicka in params i argumentet ENGINE_PARAMS
+                    move_value = minimax(board, state, current_depth - 1, alpha, beta, not is_white_turn, history, ENGINE_PARAMS=params)
                 finally:
                     undo_move(board, state, record)
 
@@ -418,9 +430,6 @@ def get_best_move(board, depth, color, state, history=None):
 
     except TimeoutError:
         # Om tiden tar slut mitt i ett djup kastas undantaget hit.
-        # Eftersom vi inte hann uppdatera 'best_move_overall' inuti det 
-        # ofullständiga djupet, faller vi nu tryggt tillbaka på det 
-        # SISTA HELT FÄRDIGRÄKNADE DJUPET istället för att chansa.
         print("Tiden tog slut – använder resultat från föregående färdiga djup.")
     
     print("Cache size:", len(cache), "entries")

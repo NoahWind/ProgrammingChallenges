@@ -1,0 +1,10 @@
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.22"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. c3 a6 2. f3 g6 3. Na3 d6 4. Kf2 Bd7 5. Ke3 Bc8 6. Kd4 Bd7 7. Kd5 Bc8 8. Kc4 Bd7 9. Kd5 Bc8 10. Kc4 Bd7 11. Kd5 Nf6+ 12. Kd4 a5 13. Kc4 Bg7 14. Kd4 Bf8 15. Kc4 Bc8 16. Kb5 Bd7+ 17. Kc4 Bg7 18. Kd4 Ng8+ 19. Kd5 Bf8 20. Kc4 Bg7 21. Kd5 Bf8 22. Kc4 Bc8 23. Kb5 Bd7+ 24. Kc4 Bc8 25. Kb5 Bd7+ 26. Kc4 1/2-1/2
+

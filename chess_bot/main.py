@@ -35,7 +35,7 @@ from chess_rules import (
     undo_move, 
     get_position_hash
 )
-from rating import get_best_move
+from rating import get_best_move, evaluate_board
 
 
 SEARCH_DEPTH = 2000000
@@ -217,111 +217,209 @@ def move_to_san(board, state, move, current_color, is_check_res, is_mate_res):
         
     return san
 
+ENGINE_PARAMS = {
+    "KING_SAFETY_BONUS": 5,
+    "CONTROL_CENTER_BONUS": 0.5,
+    "BREAKING_PAWN_CHAINS_BONUS": 1,
+    "bishop_pair_bonus": 0.5,
+    "knight_on_the_rim_penalty": 0.5,
+    "pawn_chain_bonus": 2,
+    "PASSED_PAWN_BONUS": 0.5,
+    "enemy_king_corner_bonus": 1,
+    "enemy_king_center_bonus": 0.5,
+    "hanging_piece_penalty": 0.5,
+    "squares_controlled_bonus": 0.01,
+    "pieac_pos_bonus": 0.01,
+    "OPEN_RATE": 0.6,
+    "END_RATE": 0.6
+}
 
-def play_game_from_FEN(fen):
-    board, current_color, state = parse_fen(fen)
-    print_board(board)
-    history = {}  # Här sparar vi spelets faktiska historik
+def move_to_uci(board, move):
+    """Översätter motorns drag ((sr, sc), (er, ec)) till UCI (t.ex. 'e2e4')"""
+    (sr, sc), (er, ec) = move
+    start_sq = square_to_algebraic(sr, sc)
+    end_sq = square_to_algebraic(er, ec)
+    promotion = ""
+    piece = board[sr][sc]
+    # Om en bonde når sista raden lägger vi till 'q' (dam) för promotion
+    if piece in ('♙', '♟') and (er == 0 or er == 7):
+        promotion = "q"
+    return start_sq + end_sq + promotion
+
+def uci_to_move(uci_str):
+    """Översätter Stockfish UCI ('e2e4') till motorns format ((6, 4), (4, 4))"""
+    sc = ord(uci_str[0]) - ord('a')
+    sr = 8 - int(uci_str[1])
+    ec = ord(uci_str[2]) - ord('a')
+    er = 8 - int(uci_str[3])
+    return ((sr, sc), (er, ec))
+
+def play_game_self_play(fen, params_white, params_black, num_games=1):
+    import datetime
+    import csv
+    import os
+    import chess
     
-    pgn_move_list = [] 
-    game_result = "*"  
-
-    for move_number in range(1, MAX_MOVES + 1):
-        # --- 1. KOLLA 3-FALDIG UPPREPNING FÖRST ---
-        board_hash = get_position_hash(board, current_color, state)
-        history[board_hash] = history.get(board_hash, 0) + 1
-        
-        # Kräver att ställningen skett 3 gånger OCH att det inte är ett dött slutspel med stor materialfördel
-        if history[board_hash] >= 4 and abs(state.material_score) < 5:
-            print("Remi genom 3-faldig upprepning!")
-            game_result = "1/2-1/2"
-            break
-
-        legal_moves = get_all_legal_moves(current_color, board, state)
-        
-        # --- 50-DRAGSREGELN ---
-        if state.half_move_clock >= 100:
-            print("Remi genom 50-dragsregeln!")
-            game_result = "1/2-1/2"
-            break
-            
-        # --- MATT / PATT ---
-        if not legal_moves:
-            if is_check(board, current_color, state):
-                print(f"\n{current_color.capitalize()} är schackmatt. Partiet är slut.")
-                game_result = "0-1" if current_color == 'white' else "1-0"
-            else:
-                print(f"\n{current_color.capitalize()} har inga lagliga drag (patt). Remi.")
-                game_result = "1/2-1/2"
-            break
-
-        print(f"\nDrag {move_number}: {current_color} tänker (djup {SEARCH_DEPTH})...")
-        move_start = time.time()
-        
-        # VIKTIGT: Skicka med den rena spelets historik med .copy() 
-        # så sökmotors fiktiva tankar inte kladdar här!
-        best_move = get_best_move(board, SEARCH_DEPTH, current_color, state, history.copy())
-        move_end = time.time()
-        
-        if not best_move:
-            print(f"{current_color.capitalize()} hittade inget drag. Partiet är slut.")
-            break
-
-        # --- SIMULERA OCH ÖVERSÄTT TILL PGN ---
-        record = apply_move(board, state, best_move[0], best_move[1])
-        
-        # Kontrollera om draget ledde till schack/matt för motståndaren
-        next_color = 'black' if current_color == 'white' else 'white'
-        legal_next_moves = get_all_legal_moves(next_color, board, state)
-        is_check_res = is_check(board, next_color, state)
-        is_mate_res = is_check_res and not legal_next_moves
-        
-        # Ångra draget temporärt för att pjäserna ska stå rätt när vi bygger SAN-notationen
-        undo_move(board, state, record)
-        san_move = move_to_san(board, state, best_move, current_color, is_check_res, is_mate_res)
-        
-        # Formatera PGN-texten (T.ex. "1. e4" för vit, "e5" för svart)
-        full_move_number = (move_number + 1) // 2
-        if current_color == 'white':
-            pgn_move_list.append(f"{full_move_number}. {san_move}")
-        else:
-            pgn_move_list.append(san_move)
-
-        # Gör draget på riktigt
-        apply_move(board, state, best_move[0], best_move[1])
-
-        duration_per_move = move_end - move_start
-        print(f"  -> {move_description(board, best_move)}  [{san_move}]")
-        print(f"  -> Dragtid: {duration_per_move:.2f} sekunder")
-
-        print_board(board, last_move=best_move)
-
-        current_color = next_color
-    else:
-        print(f"\nStoppade efter {MAX_MOVES} drag utan matt/patt (säkerhetsspärr).")
-
-    # --- SKAPA OCH SPARA PGN-FILEN ---
+    all_pgns = []
     date_str = datetime.datetime.now().strftime("%Y.%m.%d")
-    pgn_string = (
-        f'[Event "Engine Match"]\n'
-        f'[Site "Local"]\n'
-        f'[Date "{date_str}"]\n'
-        f'[Round "1"]\n'
-        f'[White "White Engine"]\n'
-        f'[Black "Black Engine"]\n'
-        f'[Result "{game_result}"]\n\n'
-        f'{" ".join(pgn_move_list)} {game_result}\n'
-    )
     
-    with open("match.pgn", "w", encoding="utf-8") as f:
-        f.write(pgn_string)
+    score_white = 0.0
+    score_black = 0.0
+
+    csv_filename = "self_play_evaluation.csv"
+    file_exists = os.path.exists(csv_filename)
     
+    # Sortera nycklarna så kolumnerna hamnar i ordning i CSV-filen
+    sorted_keys = sorted(params_white.keys())
+
+    with open(csv_filename, "a", newline="", encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file)
+        
+        # Skriv header om filen är ny (sparar både vita och svarta parametrar för full kontroll)
+        if not file_exists:
+            header = ["game", "move", "turn", "our_eval", "fen"] + [f"w_{k}" for k in sorted_keys] + [f"b_{k}" for k in sorted_keys]
+            writer.writerow(header)
+
+        for game_index in range(1, num_games + 1):
+            print(f"\n======================================")
+            print(f" STARTAR SJÄLVSPELANDE PARTI {game_index} AV {num_games}")
+            print(f"======================================")
+            
+            board, current_color, state = parse_fen(fen)
+            sf_board = chess.Board(fen)  # Använder python-chess för FEN och draghantering
+            
+            print_board(board)
+            
+            history = {}
+            pgn_move_list = [] 
+            game_result = "*"  
+
+            for move_number in range(1, MAX_MOVES + 1):
+                board_hash = get_position_hash(board, current_color, state)
+                history[board_hash] = history.get(board_hash, 0) + 1
+                
+                if history[board_hash] >= 4 and abs(state.material_score) < 5:
+                    print("Remi genom 3-faldig upprepning!")
+                    game_result = "1/2-1/2"
+                    break
+                if state.half_move_clock >= 100:
+                    print("Remi genom 50-dragsregeln!")
+                    game_result = "1/2-1/2"
+                    break
+                    
+                legal_moves = get_all_legal_moves(current_color, board, state)
+                if not legal_moves:
+                    if is_check(board, current_color, state):
+                        print(f"\n{current_color.capitalize()} är schackmatt. Partiet är slut.")
+                        game_result = "0-1" if current_color == 'white' else "1-0"
+                    else:
+                        print(f"\n{current_color.capitalize()} har inga lagliga drag (patt). Remi.")
+                        game_result = "1/2-1/2"
+                    break
+
+                # Välj aktiva parametrar beroende på vem som drar
+                active_params = params_white if current_color == 'white' else params_black
+                
+                # Vår motors bedömning av ställningen
+                our_eval = evaluate_board(board, state, history, current_color, active_params)
+
+                # Bygg raden för att spara till CSV
+                row = [
+                    game_index,
+                    move_number,
+                    current_color,
+                    our_eval,
+                    sf_board.fen()
+                ]
+                # Lägg till vita parametrar
+                for k in sorted_keys:
+                    row.append(params_white[k])
+                # Lägg till svarta parametrar
+                for k in sorted_keys:
+                    row.append(params_black[k])
+                
+                writer.writerow(row)
+
+                # --- DRAGVAL ---
+                player_label = "Vit (Params A)" if current_color == 'white' else "Svart (Params B)"
+                print(f"\nDrag {move_number}: {current_color} ({player_label}) tänker...")
+                
+                best_move = get_best_move(board, SEARCH_DEPTH, current_color, state, history.copy(), params=active_params)
+                if not best_move:
+                    print("Motorn hittade inget drag.")
+                    break
+                
+                uci_str = move_to_uci(board, best_move)
+                sf_board.push(chess.Move.from_uci(uci_str))
+
+                record = apply_move(board, state, best_move[0], best_move[1])
+                next_color = 'black' if current_color == 'white' else 'white'
+                legal_next_moves = get_all_legal_moves(next_color, board, state)
+                is_check_res = is_check(board, next_color, state)
+                is_mate_res = is_check_res and not legal_next_moves
+                
+                undo_move(board, state, record)
+                san_move = move_to_san(board, state, best_move, current_color, is_check_res, is_mate_res)
+                
+                full_move_number = (move_number + 1) // 2
+                if current_color == 'white':
+                    pgn_move_list.append(f"{full_move_number}. {san_move}")
+                else:
+                    pgn_move_list.append(san_move)
+
+                apply_move(board, state, best_move[0], best_move[1])
+                print_board(board, last_move=best_move)
+                current_color = next_color
+            else:
+                print(f"\nStoppade efter {MAX_MOVES} drag.")
+
+            if game_result == "1-0":
+                score_white += 1
+            elif game_result == "0-1":
+                score_black += 1
+            elif game_result == "1/2-1/2":
+                score_white += 0.5
+                score_black += 0.5
+
+            pgn_string = (
+                f'[Event "Bot Self-Play Match"]\n'
+                f'[Site "Local"]\n'
+                f'[Date "{date_str}"]\n'
+                f'[Round "{game_index}"]\n'
+                f'[White "Bot A"]\n'
+                f'[Black "Bot B"]\n'
+                f'[Result "{game_result}"]\n\n'
+                f'{" ".join(pgn_move_list)} {game_result}\n\n'
+            )
+            all_pgns.append(pgn_string)
+
+    # Spara undan PGN-filen för analys i t.ex. CuteChess eller Arena
+    with open("self_play_matches.pgn", "a", encoding="utf-8") as f:
+        f.write("".join(all_pgns))
+            
     print("\n---------------------------------------------------")
-    print("Spelet är över. Matchen har sparats till 'match.pgn'!")
+    print(f"Slutresultat: Vit {score_white} - Svart {score_black}")
+    print("Samtliga ställningar och parametrar har sparats till 'self_play_evaluation.csv'!")
 
 def main():
-    fen_start = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    play_game_from_FEN(fen_start)
+    # Optimerade parametrar baserade på Stockfish-analys
+    best_params = {
+        "BREAKING_PAWN_CHAINS_BONUS": 0.01,
+        "CONTROL_CENTER_BONUS": 3.3876,
+        "END_RATE": 0.3995,
+        "KING_SAFETY_BONUS": 7.0014,
+        "OPEN_RATE": 0.4542,
+        "PASSED_PAWN_BONUS": 0.8247,
+        "bishop_pair_bonus": 2.5685,
+        "enemy_king_center_bonus": 1.1242,
+        "enemy_king_corner_bonus": 1.0072,
+        "hanging_piece_penalty": 2.3199,
+        "knight_on_the_rim_penalty": 2.7241,
+        "pawn_chain_bonus": 0.01,
+        "pieac_pos_bonus": 0.0588,
+        "squares_controlled_bonus": 0.0579,
+    }
+    play_game_self_play("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", best_params, best_params, num_games=1)
 
 
 if __name__ == "__main__":
