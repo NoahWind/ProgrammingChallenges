@@ -58,6 +58,7 @@ ENGINE_PARAMS ={
     "pieac_pos_bonus": 24.8262,
     "rook_open_file_bonus": 0.0,
     "squares_controlled_bonus": 0.0,
+    "rook_on_seventh_rank_bonus": 0.0,
 
 
     }
@@ -87,6 +88,19 @@ def get_game_phase_weights(state, open_rate=0.6, end_rate=0.6):
     
     return a, b, c
 
+def rook_on_the_seventh_rank(board, color, state):
+    """
+    Returnerar True om en av spelarens torn är på den 7:e raden (för vit) eller 2:a raden (för svart).
+    """
+    target_rank = 6 if color == 'white' else 1
+    rook_symbol = '♖' if color == 'white' else '♜'
+    
+    for col in range(8):
+        if board[target_rank][col] == rook_symbol:
+            return True
+    return False
+
+
 def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PARAMS):
     score = float(state.material_score)
 
@@ -97,6 +111,10 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
             and abs(state.material_score) < 5
             and not _has_any_pawns(board)):
         return 0 
+    moves = get_all_legal_moves(current_color, board, state)
+    enemy_color = 'black' if current_color == 'white' else 'white'
+    enemy_moves = get_all_legal_moves(enemy_color, board, state)
+    
     
     a, b, c = get_game_phase_weights(state, ENGINE_PARAMS["OPEN_RATE"], ENGINE_PARAMS["END_RATE"])
 
@@ -127,8 +145,11 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     if Rook_Open_Files(board, 'white', state): score += ENGINE_PARAMS["rook_open_file_bonus"] * a + ENGINE_PARAMS["rook_open_file_bonus"] * b + ENGINE_PARAMS["rook_open_file_bonus"] * c
     if Rook_Open_Files(board, 'black', state): score -= ENGINE_PARAMS["rook_open_file_bonus"] * a + ENGINE_PARAMS["rook_open_file_bonus"] * b + ENGINE_PARAMS["rook_open_file_bonus"] * c
 
-    black_sqr = how_many_squares_do_i_control(board, 'black', state)
-    white_sqr = how_many_squares_do_i_control(board, 'white', state)
+    white_moves = moves if current_color == 'white' else enemy_moves
+    black_moves = enemy_moves if current_color == 'white' else moves
+
+    black_sqr = how_many_squares_do_i_control(board, 'black', state, black_moves)
+    white_sqr = how_many_squares_do_i_control(board, 'white', state, white_moves)
 
     if black_sqr > 0: score -= ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * a + ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * b + ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * c
     if white_sqr > 0: score += ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * a + ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * b + ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * c
@@ -149,12 +170,20 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     if pawn_chain(board, 'white', state): score += a*ENGINE_PARAMS["pawn_chain_bonus"] + b*ENGINE_PARAMS["pawn_chain_bonus"] + c*ENGINE_PARAMS["pawn_chain_bonus"]
     if pawn_chain(board, 'black', state): score -= a*ENGINE_PARAMS["pawn_chain_bonus"] + b*ENGINE_PARAMS["pawn_chain_bonus"] + c*ENGINE_PARAMS["pawn_chain_bonus"]
 
-    # Här lägger vi till returvärdena direkt (de hanterar redan +/- beroende på färg)
-    score += endgame_push_king_enemy_to_corner(board, 'white', state)
-    score += endgame_push_king_enemy_to_corner(board, 'black', state)
+    if rook_on_the_seventh_rank(board, 'white', state): score += a*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + b*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + c*ENGINE_PARAMS["rook_on_seventh_rank_bonus"]
+    if rook_on_the_seventh_rank(board, 'black', state): score -= a*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + b*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + c*ENGINE_PARAMS["rook_on_seventh_rank_bonus"]
 
-    score += push_king_towards_center_penalty(board, 'white', state)
-    score += push_king_towards_center_penalty(board, 'black', state)
+    # Här lägger vi till returvärdena direkt (de hanterar redan +/- beroende på färg)
+    corner_w = endgame_push_king_enemy_to_corner(board, 'white', state)
+    corner_b = endgame_push_king_enemy_to_corner(board, 'black', state)
+    score += corner_w * ENGINE_PARAMS["enemy_king_corner_bonus"] * c
+    score += corner_b * ENGINE_PARAMS["enemy_king_corner_bonus"] * c
+
+    center_w = push_king_towards_center_penalty(board, 'white', state)
+    center_b = push_king_towards_center_penalty(board, 'black', state)
+    score += center_w * ENGINE_PARAMS["enemy_king_center_bonus"] * c
+    score += center_b * ENGINE_PARAMS["enemy_king_center_bonus"] * c
+
     white_in_check = is_check(board, 'white', state)
     black_in_check = is_check(board, 'black', state)
 

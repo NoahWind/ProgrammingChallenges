@@ -1,11 +1,13 @@
 """
 Robust Binär Sökning / Intervallhalvering för optimering av schack-parametrar.
 Designad för att förhindra parameterkollaps genom MAE-loss och unika minimigränser.
+Nu med Multiprocessing!
 """
 
 import os
 import time
 import random
+import multiprocessing as mp
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -20,42 +22,41 @@ except ImportError:
 # 1. OPTIMERINGS-INSTÄLLNINGAR
 # =====================================================================
 CSV_FILENAME = os.path.join("stockfish_self_play_results", "positions_ratings.csv")
-SAMPLE_SIZE = 1500              # Ökat urval för stabilare MAE-beräkning
+SAMPLE_SIZE = ModuleNotFoundError              # Sätt till None för att köra på hela filen
 MAX_ITERATIONS = 200000
-MAX_MINUTES = 60 * 8                
-RANDOM_SEED = None              
+MAX_MINUTES = 20                
 OUTPUT_TXT = "optimized_perfect_search.txt"
 
 RATE_PARAMS = {"OPEN_RATE", "END_RATE"}
 
-# Vi tvingar optimeraren att respektera schacklogik genom att sätta unika 
-# golv för varje parameter. Hängande pjäser och PST får ALDRIG bli 0.
-MIN_BOUNDS = {
-    "KING_SAFETY_BONUS": 1.0,
-    "CONTROL_CENTER_BONUS": 0.1,
-    "BREAKING_PAWN_CHAINS_BONUS": 0.1,
-    "bishop_pair_bonus": 0.2,
-    "knight_on_the_rim_penalty": 0.2,
-    "pawn_chain_bonus": 0.2,
-    "PASSED_PAWN_BONUS": 0.5,
-    "enemy_king_corner_bonus": 0.2,
-    "enemy_king_center_bonus": 0.1,
-    "hanging_piece_penalty": 1.5,     # HÅRT STRAFF: Får aldrig gå under 1.5 centipawns
+MIN_BOUNDS = { 
+    "KING_SAFETY_BONUS": 0.001,
+    "CONTROL_CENTER_BONUS": 0.001,
+    "BREAKING_PAWN_CHAINS_BONUS": 0.001,
+    "bishop_pair_bonus": 0.001,
+    "knight_on_the_rim_penalty": 0.001,
+    "pawn_chain_bonus": 0.001,
+    "PASSED_PAWN_BONUS": 0.001,
+    "enemy_king_corner_bonus": 0.001,
+    "enemy_king_center_bonus": 0.001,
+    "hanging_piece_penalty": 0.001,     
     "squares_controlled_bonus": 0.001,
-    "pieac_pos_bonus": 0.05,          # Tvingar motorn att använda PST
-    "rook_open_file_bonus": 0.1,
-    "isolated_pawn_penalty": 0.2,
-    "OPEN_RATE": 0.1,
-    "END_RATE": 0.1
+    "pieac_pos_bonus": 0.01,          
+    "rook_open_file_bonus": 0.001,
+    "isolated_pawn_penalty": 0.001,
+    "OPEN_RATE": 0.0001,
+    "END_RATE": 0.0001,
+    "rook_on_seventh_rank_bonus": 0.5,
+
 }
 
-best_params = {
-    "BREAKING_PAWN_CHAINS_BONUS": 1.0,
-    "CONTROL_CENTER_BONUS": 0.5,
-    "END_RATE": 0.6,
-    "KING_SAFETY_BONUS": 5.0,
-    "OPEN_RATE": 0.6,
-    "PASSED_PAWN_BONUS": 0.5,
+best_params = { 
+    "BREAKING_PAWN_CHAINS_BONUS": 0.001,
+    "CONTROL_CENTER_BONUS": 0.001,
+    "END_RATE": 0.0001,
+    "KING_SAFETY_BONUS": 0.0001,
+    "OPEN_RATE": 0.0001,
+    "PASSED_PAWN_BONUS": 0.001,
     "bishop_pair_bonus": 0.5,
     "enemy_king_center_bonus": 0.5,
     "enemy_king_corner_bonus": 1.0,
@@ -66,22 +67,29 @@ best_params = {
     "pieac_pos_bonus": 1.0,
     "rook_open_file_bonus": 0.5,
     "squares_controlled_bonus": 0.01,
+    "rook_on_seventh_rank_bonus": 0.0005,
 }
 
-def evaluate_single(item, weights, error_counter):
+# =====================================================================
+# 2. MULTIPROCESSING OCH UTVÄRDERING
+# =====================================================================
+
+def _eval_worker(args):
+    """Hjälpfunktion för multiprocessing. Måste ligga på top-level."""
+    item, weights = args
     board, current_color, state = item
     try:
         return evaluate_board(board, state, {}, current_color, weights)
-    except Exception as e:
-        error_counter["count"] += 1
-        error_counter["last_error"] = str(e)
-    return 0.0
+    except Exception:
+        return 0.0
 
-def evaluate_all(parsed_boards, weights, error_counter):
-    return np.array([evaluate_single(item, weights, error_counter) for item in parsed_boards])
+def evaluate_all(parsed_boards, weights, pool):
+    """Använder den inskickade process-poolen för att utvärdera bräden parallellt."""
+    tasks = [(item, weights) for item in parsed_boards]
+    results = pool.map(_eval_worker, tasks)
+    return np.array(results)
 
 def save_progress(param_keys, weights, mae, filename=OUTPUT_TXT):
-    """Sparar bästa kända parametrar. Skalningsfaktorn (best_scale) är helt borttagen."""
     optimized_params = {}
     for i, key in enumerate(param_keys):
         optimized_params[key] = round(float(weights[i]), 4)
@@ -94,8 +102,12 @@ def save_progress(param_keys, weights, mae, filename=OUTPUT_TXT):
         f.write("}\n")
 
 def sample_and_parse(full_df, sample_size, seed=None):
-    n = min(sample_size, len(full_df))
-    df_sample = full_df.sample(n=n, random_state=seed).reset_index(drop=True)
+    # Om sample_size är None eller inte ett heltal, ta 100% av filen
+    if sample_size is None or not isinstance(sample_size, int):
+        df_sample = full_df.sample(frac=1.0, random_state=seed).reset_index(drop=True)
+    else:
+        n = min(sample_size, len(full_df))
+        df_sample = full_df.sample(n=n, random_state=seed).reset_index(drop=True)
 
     boards = []
     ok_mask = np.ones(len(df_sample), dtype=bool)
@@ -115,101 +127,110 @@ def sample_and_parse(full_df, sample_size, seed=None):
     valid_sf = df_sample["stockfish_eval"].values[ok_mask]
     return valid_boards, valid_sf
 
+# =====================================================================
+# 3. BINÄR SÖKNING
+# =====================================================================
+
 def binary_search_optimize(full_df, param_keys, initial_weights):
     current_weights = list(initial_weights)
-    error_counter = {"count": 0, "last_error": None}
 
-    boards0, sf0 = sample_and_parse(full_df, SAMPLE_SIZE, seed=RANDOM_SEED)
-    initial_dict = {param_keys[i]: current_weights[i] for i in range(len(param_keys))}
-    preds0 = evaluate_all(boards0, initial_dict, error_counter)
+    print("\n--- Startar Perfekt Sökning med Multiprocessing! ---")
+    print("Laddar och fryser statiskt träningsurval...")
     
-    # Använder Mean Absolute Error (MAE) istället för MSE
-    best_mae = np.mean(np.abs(preds0 - sf0))
-
-    print(f"\n--- Startar Perfekt Sökning! Initial MAE: {best_mae:.2f} ---")
+    # DATAN FRYSES HÄR: Laddas enbart EN gång före loopen med fast seed!
+    parsed_boards, sf_evals = sample_and_parse(full_df, SAMPLE_SIZE, seed=42)
     
-    start_time = time.time()
-    time_limit_seconds = MAX_MINUTES * 60
-
-    for it in range(MAX_ITERATIONS):
-        if time.time() - start_time >= time_limit_seconds:
-            print(f"\n*** Tidsgränsen på {MAX_MINUTES} minuter nådd! ***")
-            break
-
-        print(f"\n>>> ITERATION {it + 1}/{MAX_ITERATIONS} <<<")
-        parsed_boards, sf_evals = sample_and_parse(full_df, SAMPLE_SIZE, seed=None)
+    # Startar process-poolen en gång för hela sökningen
+    num_cores = mp.cpu_count() - 1
+    print(f"Använder {num_cores} CPU-kärnor för utvärdering.")
+    
+    with mp.Pool(processes=num_cores) as pool:
+        initial_dict = {param_keys[i]: current_weights[i] for i in range(len(param_keys))}
+        preds_current = evaluate_all(parsed_boards, initial_dict, pool)
         
-        current_dict = {param_keys[i]: current_weights[i] for i in range(len(param_keys))}
-        preds_current = evaluate_all(parsed_boards, current_dict, error_counter)
         best_mae = np.mean(np.abs(preds_current - sf_evals))
-        print(f"    MAE för nuvarande vikter på nya urvalet: {best_mae:.2f}")
-
-        improved_this_iteration = False
+        print(f"Initial MAE på det fasta urvalet: {best_mae:.4f}")
         
-        # Blanda parameterordningen varje runda för att undvika riktningsbias
-        shuffled_indices = list(range(len(param_keys)))
-        random.shuffle(shuffled_indices)
+        start_time = time.time()
+        time_limit_seconds = MAX_MINUTES * 60
 
-        for idx in tqdm(shuffled_indices, desc=f"Runda {it + 1}", colour="green"):
+        for it in range(MAX_ITERATIONS):
             if time.time() - start_time >= time_limit_seconds:
-                return current_weights, best_mae
+                print(f"\n*** Tidsgränsen på {MAX_MINUTES} minuter nådd! ***")
+                break
 
-            key = param_keys[idx]
-            current_val = current_weights[idx]
-            best_val_for_key = current_val
+            print(f"\n>>> ITERATION {it + 1}/{MAX_ITERATIONS} <<<")
+            print(f"    MAE vid start av runda: {best_mae:.4f}")
 
-            step = 1.0              
-            max_step = 16.0         
-            tolerance_step = 0.001
-            min_allowed = MIN_BOUNDS.get(key, 0.001)
+            improved_this_iteration = False
+            
+            shuffled_indices = list(range(len(param_keys)))
+            random.shuffle(shuffled_indices)
 
-            while step >= tolerance_step:
-                base_val = current_val if abs(current_val) >= 1e-4 else min_allowed
+            for idx in tqdm(shuffled_indices, desc=f"Runda {it + 1}", colour="green"):
+                if time.time() - start_time >= time_limit_seconds:
+                    return current_weights, best_mae
 
-                test_vals = [
-                    base_val * (1.0 - step),
-                    base_val * (1.0 + step)
-                ]
+                key = param_keys[idx]
+                current_val = current_weights[idx]
+                best_val_for_key = current_val
 
-                if key in RATE_PARAMS:
-                    test_vals = [v for v in test_vals if min_allowed <= v <= 0.99]
-                else:
-                    test_vals = [v for v in test_vals if v >= min_allowed]
+                step = 1.0              
+                max_step = 16.0         
+                tolerance_step = 0.001
+                min_allowed = MIN_BOUNDS.get(key, 0.001)
 
-                improved_in_step = False
-                for val in test_vals:
-                    if val == current_val:
-                        continue
+                while step >= tolerance_step:
+                    base_val = current_val if abs(current_val) >= 1e-4 else min_allowed
 
-                    test_weights = list(current_weights)
-                    test_weights[idx] = val
-                    weight_dict = {param_keys[j]: test_weights[j] for j in range(len(param_keys))}
+                    test_vals = [
+                        base_val * (1.0 - step),
+                        base_val * (1.0 + step)
+                    ]
 
-                    preds = evaluate_all(parsed_boards, weight_dict, error_counter)
-                    if np.array_equal(preds, preds_current):
-                        continue
+                    if key in RATE_PARAMS:
+                        test_vals = [v for v in test_vals if min_allowed <= v <= 0.99]
+                    else:
+                        test_vals = [v for v in test_vals if v >= min_allowed]
 
-                    mae = np.mean(np.abs(preds - sf_evals))
+                    improved_in_step = False
+                    for val in test_vals:
+                        if val == current_val:
+                            continue
 
-                    if best_mae - mae > 0.01:
-                        print(f"  [+] {key} förbättrades! {current_val:.4f} -> {val:.4f} (Ny MAE: {mae:.2f})")
-                        best_mae = mae
-                        best_val_for_key = val
-                        improved_this_iteration = True
-                        improved_in_step = True
+                        test_weights = list(current_weights)
+                        test_weights[idx] = val
+                        weight_dict = {param_keys[j]: test_weights[j] for j in range(len(param_keys))}
 
-                if improved_in_step:
-                    current_val = best_val_for_key
-                    step = min(step * 1.5, max_step)
-                else:
-                    step /= 2.0
+                        preds = evaluate_all(parsed_boards, weight_dict, pool)
+                        if np.array_equal(preds, preds_current):
+                            continue
 
-            current_weights[idx] = best_val_for_key
+                        mae = np.mean(np.abs(preds - sf_evals))
 
-        save_progress(param_keys, current_weights, best_mae)
+                        if best_mae - mae > 0.0001:
+                            print(f"  [+] {key} förbättrades! {current_val:.4f} -> {val:.4f} (Ny MAE: {mae:.4f})")
+                            best_mae = mae
+                            best_val_for_key = val
+                            improved_this_iteration = True
+                            improved_in_step = True
+                            
+                            # Cachen uppdateras för att tidiga hopp ska fungera!
+                            preds_current = preds
 
-        if not improved_this_iteration:
-            print("    Ingen förbättring denna runda (konvergens nådd).")
+                    if improved_in_step:
+                        current_val = best_val_for_key
+                        step = min(step * 1.5, max_step)
+                    else:
+                        step /= 2.0
+
+                current_weights[idx] = best_val_for_key
+
+            save_progress(param_keys, current_weights, best_mae)
+
+            if not improved_this_iteration:
+                print("    Ingen förbättring denna runda (konvergens nådd).")
+                break
 
     return current_weights, best_mae
 
@@ -221,8 +242,8 @@ def main():
     full_df = pd.read_csv(CSV_FILENAME)
     full_df = full_df.rename(columns={"eval_cp": "stockfish_eval"})
     
-    # Clip är viktig för att Stockfishs mate-scores (+10000) inte ska spränga felet
-    full_df["stockfish_eval"] = full_df["stockfish_eval"].clip(-1500, 1500)
+    # Clip och konvertering till Bönder från Centipawns
+    full_df["stockfish_eval"] = full_df["stockfish_eval"].clip(-1500, 1500) / 100.0  
     
     param_keys = sorted(best_params.keys())
     initial_weights = [float(best_params[k]) for k in param_keys]

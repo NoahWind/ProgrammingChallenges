@@ -121,7 +121,6 @@ WHITE_PIECES = {'♙', '♘', '♗', '♕', '♖', '♔'}
 cache = {}
 search_start_time = 0
 time_limit_seconds = 0.000005
-DEFAULT_TIME_LIMIT_SECONDS = 2
 
 
 # ==========================================
@@ -334,13 +333,12 @@ def breakt_pawn_chains(board, color, state):
                 return True
     return False
 
-def how_many_squares_do_i_control(board, color, state):
+def how_many_squares_do_i_control(board, color, state,moves):
     # get_all_legal_moves beror bara på board/state/color - inte på vilken
     # egen pjäs vi råkar loopa över just nu, så den ska bara anropas EN gång
     # totalt, inte en gång per egen pjäs (var tidigare upp till ~16x dyrare
     # än nödvändigt, eftersom hela draglistan räknades om för varje pjäs
     # bara för att filtreras ner till en enda pjäs drag).
-    moves = get_all_legal_moves(color, board, state)
 
     own_pieces = state.white_pieces if color == 'white' else state.black_pieces
     own_piece_squares = {(r, c) for r, c in own_pieces if board[r][c] != ' '}
@@ -428,11 +426,10 @@ def endgame_push_king_enemy_to_corner(board, color, state):
     bonus = (3.5 - corner_distance) * 0.1  # Ju närmare hörnet, desto högre bonus
     return bonus if color == 'white' else -bonus
 
-def not_hanging_my_own_pieces(board, color, state):
+def not_hanging_my_own_pieces(board, color, state, enemy_moves):
     """NY HEURISTIK: ger en liten bonus om man inte har hängande pjäser (pjäser som kan slås utan motdrag). Ju fler hängande pjäser, desto större straff."""
     own_pieces = state.white_pieces if color == 'white' else state.black_pieces
     enemy_color = 'black' if color == 'white' else 'white'
-    enemy_moves = get_all_legal_moves(enemy_color, board, state)
     
     hanging_count = 0
     for r, c in own_pieces:

@@ -79,8 +79,17 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
         for move in capture_moves:
             # Delta pruning: även i bästa fall (vinner hela den slagna pjäsen)
             # räcker det inte att komma över alpha -> hoppa över draget.
-            captured = board[move[1][0]][move[1][1]]
+            (sr, sc), (er, ec) = move
+            moving_piece = board[sr][sc]
+            captured = board[er][ec]
             captured_val = abs(PIECE_ORDER_VALUE.get(captured, 0))
+
+            # Fånga bondeförvandling (värd en dam)
+            if moving_piece in ('♙', '♟') and (er == 0 or er == 7):
+                captured_val += 9
+            # Fånga En Passant (värd en bonde)
+            elif moving_piece in ('♙', '♟') and captured == ' ' and sc != ec:
+                captured_val += 1
             if stand_pat + captured_val + DELTA_MARGIN <= alpha:
                 continue
 
@@ -100,8 +109,17 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
         return alpha
     else:
         for move in capture_moves:
-            captured = board[move[1][0]][move[1][1]]
+            (sr, sc), (er, ec) = move
+            moving_piece = board[sr][sc]
+            captured = board[er][ec]
             captured_val = abs(PIECE_ORDER_VALUE.get(captured, 0))
+
+            # Fånga bondeförvandling (värd en dam)
+            if moving_piece in ('♙', '♟') and (er == 0 or er == 7):
+                captured_val += 9
+            # Fånga En Passant (värd en bonde)
+            elif moving_piece in ('♙', '♟') and captured == ' ' and sc != ec:
+                captured_val += 1
             if stand_pat - captured_val - DELTA_MARGIN >= beta:
                 continue
 
@@ -221,7 +239,7 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PAR
         history[board_hash] -= 1
         return min_eval
     
-def get_best_move(board, depth, color, state, history=None, params=None):
+def get_best_move(board, depth, color, state, history=None, params=None, DEFAULT_TIME_LIMIT_SECONDS=5):
     global cache, search_start_time, time_limit_seconds
 
     search_start_time = time.time()

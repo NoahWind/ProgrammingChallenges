@@ -256,7 +256,7 @@ def uci_to_move(uci_str):
     er = 8 - int(uci_str[3])
     return ((sr, sc), (er, ec))
 
-def play_game_self_play(fen, params_white, params_black, num_games=1):
+def play_game_self_play(fen, params_white, params_black, num_games=1, default_time_limit_seconds=5):
     import datetime
     import csv
     import os
@@ -346,7 +346,7 @@ def play_game_self_play(fen, params_white, params_black, num_games=1):
                 player_label = "Vit (Params A)" if current_color == 'white' else "Svart (Params B)"
                 print(f"\nDrag {move_number}: {current_color} ({player_label}) tänker...")
                 
-                best_move = get_best_move(board, SEARCH_DEPTH, current_color, state, history.copy(), params=active_params)
+                best_move = get_best_move(board, SEARCH_DEPTH, current_color, state, history.copy(), params=active_params, DEFAULT_TIME_LIMIT_SECONDS=default_time_limit_seconds)
                 if not best_move:
                     print("Motorn hittade inget drag.")
                     break
@@ -406,26 +406,30 @@ def play_game_self_play(fen, params_white, params_black, num_games=1):
 def main():
     # Optimerade parametrar baserade på Stockfish-analys
 # Perfekt Optimerade Parametrar (MAE=36.90)
-    best_params = best_params = {
-    "BREAKING_PAWN_CHAINS_BONUS": 1.0,
-    "CONTROL_CENTER_BONUS": 0.25,
-    "END_RATE": 0.3,
-    "KING_SAFETY_BONUS": 1.123,
-    "OPEN_RATE": 0.1875,
-    "PASSED_PAWN_BONUS": 0.5,
-    "bishop_pair_bonus": 0.5,
+    THINKING_TIME = 0.6  # sekunder per drag
+    # Perfekt Optimerade Parametrar (MAE=0.95)
+    best_params = {
+    "BREAKING_PAWN_CHAINS_BONUS": 0.001,
+    "CONTROL_CENTER_BONUS": 0.001,
+    "END_RATE": 0.0001,
+    "KING_SAFETY_BONUS": 0.0001,
+    "OPEN_RATE": 0.0001,
+    "PASSED_PAWN_BONUS": 0.001,
+    "bishop_pair_bonus": 0.0312,
     "enemy_king_center_bonus": 0.5,
     "enemy_king_corner_bonus": 1.0,
-    "hanging_piece_penalty": 1.5,
-    "isolated_pawn_penalty": 0.5,
-    "knight_on_the_rim_penalty": 0.5,
-    "pawn_chain_bonus": 0.5,
-    "pieac_pos_bonus": 0.125,
-    "rook_open_file_bonus": 0.5,
-    "squares_controlled_bonus": 0.01,
+    "hanging_piece_penalty": 0.0171,
+    "isolated_pawn_penalty": 0.0137,
+    "knight_on_the_rim_penalty": 0.0043,
+    "pawn_chain_bonus": 0.0085,
+    "pieac_pos_bonus": 0.0116,
+    "rook_open_file_bonus": 0.0043,
+    "squares_controlled_bonus": 0.001,
+    "rook_on_seventh_rank_bonus": 0.0001,
     }
 
-    play_game_self_play("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", best_params, best_params, num_games=1)
+
+    play_game_self_play("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", best_params, best_params, num_games=1, default_time_limit_seconds=THINKING_TIME)
 
 
 if __name__ == "__main__":
