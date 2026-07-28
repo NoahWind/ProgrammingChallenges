@@ -1,0 +1,10 @@
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.28"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. e3 g6 2. Qf3 d5 3. Nc3 Nf6 4. Nge2 Nc6 5. Nd4 Nxd4 6. exd4 Bf5 7. Bd3 Bg4 8. Bb5+ c6 9. Qd3 cxb5 10. Qxb5+ Qd7 11. Qxd7+ Bxd7 12. b3 Rc8 13. Kd1 Ne4 14. Nxe4 dxe4 15. f3 Bg7 16. Bb2 exf3 17. gxf3 Bf5 18. Bc3 Rd8 19. Re1 Bxd4 20. Kc1 Bxc3 21. dxc3 Rc8 22. c4 b5 23. Kb1 bxc4 24. bxc4 Rb8+ 25. Kc1 Rb4 26. c5 Rc4 27. Re2 Kf8 28. Kb1 Rb4+ 29. Kc1 Rc4 30. Rd2 Rxc5 31. Rd8+ Kg7 32. Rd2 Rhc8 33. c4 Kf8 34. a4 Rxc4+ 35. Kb2 Rc2+ 36. Rxc2 Rxc2+ 37. Kb3 Rxh2 38. Re1 Be6+ 39. Kc3 Bd5 40. f4 Bc6 41. a5 Rh4 42. Kd4 Rxf4+ 43. Ke5 Rc4 44. a6 Ba8 45. Re3 Bc6 46. Re2 Rb4 47. Re3 Ba8 48. Re2 Ra4 49. Re3 Re4+ 50. Rxe4 Bxe4 51. Kxe4 h6 52. Kd5 Kg7 53. Kc6 f5 54. Kb7 e6 55. Kxa7 Kf7 56. Kb6 e5 57. a7 e4 58. a8=Q Kg7 59. Qd5 Kf8 60. Qe5 Kf7 61. Kb7 g5 62. Qxf5+ Kg7 63. Qxe4 h5 64. Qf5 g4 65. Qxh5 Kf6 66. Kc6 g3 67. Kd5 g2 68. Qg4 g1=Q 69. Qxg1 Kf5 70. Qf2+ Kg5 71. Ke6 Kg6 72. Qg3+ Kh7 73. Kf7 Kh8 74. Qg7# 1-0
+

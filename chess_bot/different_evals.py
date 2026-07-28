@@ -121,7 +121,7 @@ WHITE_PIECES = {'♙', '♘', '♗', '♕', '♖', '♔'}
 cache = {}
 search_start_time = 0
 time_limit_seconds = 0.000005
-DEFAULT_TIME_LIMIT_SECONDS = 5
+DEFAULT_TIME_LIMIT_SECONDS = 2
 
 
 # ==========================================
@@ -198,7 +198,51 @@ def is_controling_center(board, color):
 
 
 def is_king_safe(board, color, state):
-    return not is_check(board, color, state)
+    """
+    Bättre kungsäkerhet: Kollar inte bara om kungen står i schack,
+    utan också om den har sin bondeförsvarslinje intakt och
+    hur många rutor runt kungen som är attackerade av motståndaren.
+    """
+    king_pos = state.white_king_pos if color == 'white' else state.black_king_pos
+    if king_pos is None:
+        return False
+
+    kr, kc = king_pos
+    enemy_color = 'black' if color == 'white' else 'white'
+
+    # 1. Om kungen står i schack just nu är den absolut inte säker
+    if is_check(board, color, state, king_pos):
+        return False
+
+    # 2. Kolla bondeskölden framför kungen (exempelvis raden framför)
+    # För vit är framför rad r-1, för svart rad r+1
+    shield_row = kr - 1 if color == 'white' else kr + 1
+    pawn_piece = '♙' if color == 'white' else '♟'
+    
+    pawn_shield_count = 0
+    if 0 <= shield_row < 8:
+        # Kolla kolumnen till vänster, kungen, och till höger (3 rutor framför)
+        for c_offset in (-1, 0, 1):
+            nc = kc + c_offset
+            if 0 <= nc < 8:
+                if board[shield_row][nc] == pawn_piece:
+                    pawn_shield_count += 1
+
+    # 3. Räkna hur många rutor i kungens omedelbara 3x3-zon som är attackerade av fienden
+    threatened_squares = 0
+    for dr in (-1, 0, 1):
+        for dc in (-1, 0, 1):
+            if dr == 0 and dc == 0:
+                continue
+            nr, nc = kr + dr, kc + dc
+            if 0 <= nr < 8 and 0 <= nc < 8:
+                if _is_square_attacked_fast(board, nr, nc, enemy_color):
+                    threatened_squares += 1
+
+    # En kung anses "säker" om den har minst 2 bönder i skölden 
+    # och inte har mer än 1 hotad ruta i sin närhet.
+    is_safe = (pawn_shield_count >= 2) and (threatened_squares <= 1)
+    return is_safe
 
 
 def is_wining_in_material(board, color):
@@ -311,6 +355,44 @@ def how_many_squares_do_i_control(board, color, state):
 def three_fold_repetition(history, board, current_color, state):
     board_hash = (tuple(map(tuple, board)), current_color, _state_key(state))
     return history.get(board_hash, 0) >= 2
+
+def Rook_Open_Files(board, color, state):
+    """NY HEURISTIK: ger en liten bonus om man har torn på öppna linjer (dvs. inga egna bönder på den kolumnen)."""
+    own_pieces = state.white_pieces if color == 'white' else state.black_pieces
+    pawn_piece = '♙' if color == 'white' else '♟'
+    rook_piece = '♖' if color == 'white' else '♜'
+
+    open_file_bonus = 0.0
+
+    for r, c in own_pieces:
+        if board[r][c] == rook_piece:
+            # Kolla om det finns egna bönder på samma kolumn
+            has_own_pawn_on_file = any(board[row][c] == pawn_piece for row in range(8))
+            if not has_own_pawn_on_file:
+                open_file_bonus += 0.2  # Bonus för varje torn på en öppen linje
+
+    return open_file_bonus if color == 'white' else -open_file_bonus
+
+def isolated_pawn_penalty_or_doubling(board, color, state):
+    """NY HEURISTIK: ger en liten bonus om man har isolerade bönder (bönder som inte har några vänner på de intilliggande kolumnerna)."""
+    own_pieces = state.white_pieces if color == 'white' else state.black_pieces
+    pawn_piece = '♙' if color == 'white' else '♟'
+
+    isolated_pawn_penalty = 0.0
+
+    for r, c in own_pieces:
+        if board[r][c] == pawn_piece:
+            # Kolla om det finns egna bönder på de intilliggande kolumnerna
+            has_own_pawn_on_adjacent_files = any(
+                board[row][col] == pawn_piece
+                for row in range(8)
+                for col in [c - 1, c + 1]
+                if 0 <= col < 8
+            )
+            if not has_own_pawn_on_adjacent_files:
+                isolated_pawn_penalty += 0.2  # Straff för varje isolerad bonde
+
+    return isolated_pawn_penalty if color == 'white' else -isolated_pawn_penalty
 
 def push_king_towards_center_penalty(board, color, state):
     """NY HEURISTIK: ger en liten bonus om kungen är nära centrum i slutspel.
@@ -431,26 +513,3 @@ def _is_square_attacked_fast(board, r, c, by_color):
             curr_c += dc
 
     return False
-
-
-def hanging_pieces_penalty(board, color, state):
-    """Straffar pjäser som är attackerade av motståndaren men saknar eget försvar."""
-    enemy_color = 'black' if color == 'white' else 'white'
-    own_pieces = state.white_pieces if color == 'white' else state.black_pieces
-    
-    penalty = 0.0
-    
-    for r, c in own_pieces:
-        piece = board[r][c]
-        if piece == ' ' or piece in ('♔', '♚'):
-            continue  # Hoppa över tomma rutor och kungen
-            
-        # Om pjäsen är attackerad av motståndaren...
-        if _is_square_attacked_fast(board, r, c, enemy_color):
-            # ...och INTE är försvarad av oss själva, då är den hängande!
-            if not _is_square_attacked_fast(board, r, c, color):
-                val = abs(PIECE_VALUES.get(piece, 0))
-                penalty += val * 0.15  # Straffproportionellt mot pjäsvärdet
-
-    # Returnera negativt för vit (sänker vits poäng) och positivt för svart (höjer fördel svart)
-    return -penalty if color == 'white' else penalty

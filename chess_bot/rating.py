@@ -1,6 +1,5 @@
 import time
 from chess_rules import get_all_legal_moves, get_location_of_all_pieces, is_check, apply_move, undo_move, is_stalemate, get_position_hash
-
 # ==========================================
 # ÄNDRAT jämfört med föregående version:
 #
@@ -42,22 +41,26 @@ from chess_rules import get_all_legal_moves, get_location_of_all_pieces, is_chec
 
 from different_evals import *
 
-ENGINE_PARAMS = {
-    "KING_SAFETY_BONUS": 5,
-    "CONTROL_CENTER_BONUS": 0.5,
-    "BREAKING_PAWN_CHAINS_BONUS": 1,
-    "bishop_pair_bonus": 0.5,
-    "knight_on_the_rim_penalty": 0.5,
-    "pawn_chain_bonus": 2,
-    "PASSED_PAWN_BONUS": 0.5,
-    "enemy_king_corner_bonus": 1,
-    "enemy_king_center_bonus": 0.5,
-    "hanging_piece_penalty": 0.5,
-    "squares_controlled_bonus": 0.01,
-    "pieac_pos_bonus": 0.01,
-    "OPEN_RATE": 0.6,
-    "END_RATE": 0.6
-}
+ENGINE_PARAMS ={
+    "BREAKING_PAWN_CHAINS_BONUS": 0.0021,
+    "CONTROL_CENTER_BONUS": 14.7545,
+    "END_RATE": 0.0328,
+    "KING_SAFETY_BONUS": 0.0004,
+    "OPEN_RATE": 0.0199,
+    "PASSED_PAWN_BONUS": 0.1252,
+    "bishop_pair_bonus": 0.5911,
+    "enemy_king_center_bonus": 0.1252,
+    "enemy_king_corner_bonus": 0.2503,
+    "hanging_piece_penalty": -557,
+    "isolated_pawn_penalty": 0.1156,
+    "knight_on_the_rim_penalty": 0.3939,
+    "pawn_chain_bonus": 1.1622,
+    "pieac_pos_bonus": 24.8262,
+    "rook_open_file_bonus": 0.0,
+    "squares_controlled_bonus": 0.0,
+
+
+    }
 def _has_any_pawns(board):
     return any(piece in ('♙', '♟') for row in board for piece in row)
 
@@ -118,6 +121,12 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     if knight_on_the_rim(board, 'white', state): score -= ENGINE_PARAMS["knight_on_the_rim_penalty"] * a + ENGINE_PARAMS["knight_on_the_rim_penalty"] * b + ENGINE_PARAMS["knight_on_the_rim_penalty"] * c
     if knight_on_the_rim(board, 'black', state): score += ENGINE_PARAMS["knight_on_the_rim_penalty"] * a + ENGINE_PARAMS["knight_on_the_rim_penalty"] * b + ENGINE_PARAMS["knight_on_the_rim_penalty"] * c
 
+    if isolated_pawn_penalty_or_doubling(board, 'white', state): score -= ENGINE_PARAMS["isolated_pawn_penalty"] * a + ENGINE_PARAMS["isolated_pawn_penalty"] * b + ENGINE_PARAMS["isolated_pawn_penalty"] * c
+    if isolated_pawn_penalty_or_doubling(board, 'black', state): score += ENGINE_PARAMS["isolated_pawn_penalty"] * a + ENGINE_PARAMS["isolated_pawn_penalty"] * b + ENGINE_PARAMS["isolated_pawn_penalty"] * c
+
+    if Rook_Open_Files(board, 'white', state): score += ENGINE_PARAMS["rook_open_file_bonus"] * a + ENGINE_PARAMS["rook_open_file_bonus"] * b + ENGINE_PARAMS["rook_open_file_bonus"] * c
+    if Rook_Open_Files(board, 'black', state): score -= ENGINE_PARAMS["rook_open_file_bonus"] * a + ENGINE_PARAMS["rook_open_file_bonus"] * b + ENGINE_PARAMS["rook_open_file_bonus"] * c
+
     black_sqr = how_many_squares_do_i_control(board, 'black', state)
     white_sqr = how_many_squares_do_i_control(board, 'white', state)
 
@@ -133,12 +142,12 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     score += hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * a + hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * b + hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * c
 
 
-    score += passed_pawn_score(board, 'white', state)
-    score += passed_pawn_score(board, 'black', state)
+    if passed_pawn_score(board, 'white', state): score += a*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + b*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + c*ENGINE_PARAMS["PASSED_PAWN_BONUS"]
+    if passed_pawn_score(board, 'black', state): score -= a*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + b*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + c*ENGINE_PARAMS["PASSED_PAWN_BONUS"]
 
     # Pawn chains returnerar bara True/False, så där behåller vi if-satsen
-    if pawn_chain(board, 'white', state): score += ENGINE_PARAMS["pawn_chain_bonus"]
-    if pawn_chain(board, 'black', state): score -= ENGINE_PARAMS["pawn_chain_bonus"]
+    if pawn_chain(board, 'white', state): score += a*ENGINE_PARAMS["pawn_chain_bonus"] + b*ENGINE_PARAMS["pawn_chain_bonus"] + c*ENGINE_PARAMS["pawn_chain_bonus"]
+    if pawn_chain(board, 'black', state): score -= a*ENGINE_PARAMS["pawn_chain_bonus"] + b*ENGINE_PARAMS["pawn_chain_bonus"] + c*ENGINE_PARAMS["pawn_chain_bonus"]
 
     # Här lägger vi till returvärdena direkt (de hanterar redan +/- beroende på färg)
     score += endgame_push_king_enemy_to_corner(board, 'white', state)
@@ -197,242 +206,152 @@ def _is_capture_move(board, state, move):
 
 
 def _terminal_score(current_color, depth=0):
-    """±(1 000 000 + depth) vid matt, 0 vid patt. Delas av minimax och
-    quiescence_search.
 
-    BUGGFIX: tidigare gavs alltid exakt ±1 000 000 oavsett hur djupt i
-    trädet mattet hittades, vilket gjorde motorn likgiltig mellan matt i 1
-    och matt i 8 - den kunde skjuta upp en vinst helt i onödan, eller (vid
-    förlust) gå rakt in i den snabbast möjliga mattsättningen istället för
-    att bjuda motstånd. `depth` är kvarvarande sökdjup när mattet hittas;
-    ett större kvarvarande djup betyder att mattet hittades snabbare (färre
-    drag förbrukade), så det ska ge ett större utslag."""
     magnitude = 1_000_000 + depth
     return -magnitude if current_color == 'white' else magnitude
 
-def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth=0, ENGINE_PARAMS=ENGINE_PARAMS):
-    # BUGGFIX: quiescence_search saknade helt tidsgränskoll. Vid långa
-    # forcerande slagserier kunde ett enskilt drag därför ta betydligt
-    # längre tid än DEFAULT_TIME_LIMIT_SECONDS, eftersom minimax bara
-    # kollar klockan i sina egna anrop - inte under tiden quiescence_search
-    # arbetar.
-    if time.time() - search_start_time > time_limit_seconds:
-        raise TimeoutError()
+"""
+Förbättrad quiescence_search + hjälpfunktioner.
+Klistra in i rating.py (ersätt gamla quiescence_search, lägg till de nya
+hjälpfunktionerna ovanför den).
 
-    current_color = 'white' if is_maximizing else 'black'
-    moves = get_all_legal_moves(current_color, board, state)
+FÖRÄNDRINGAR mot originalet:
+1. Använder get_all_legal_moves(..., captures_only=True) när INTE i schack
+   -> ingen onödig draggenerering/legalitetskoll av tysta drag vid varje löv.
+2. Särbehandlar schack: om man står i schack finns inget "stand pat" - man
+   MÅSTE svara. Då söks ALLA lagliga svar (inte bara slag), annars missar
+   motorn taktik som kräver ett tyst kungdrag/blockering som schacksvar.
+3. Delta pruning: hoppar över ett slag om ens bästa tänkbara utfall
+   (stand_pat + slaget pjäsens värde + marginal) ändå inte kan nå alpha.
+4. SEE (Static Exchange Evaluation): hoppar över slag som förlorar material
+   efter en fullständig utbytesföljd på rutan (t.ex. Dxb2 där b2-bonden är
+   väl försvarad) - sådana slag är i praktiken aldrig rätt drag i tyst läge
+   och kostar annars mycket sökdjup för inget.
+"""
 
-    if not moves:
-        return _terminal_score(current_color, -q_depth) if is_check(board, current_color, state) else 0
+import time
 
-    # Nu skickar vi med history och current_color till evaluate_board
-    stand_pat = evaluate_board(board, state, history, current_color, ENGINE_PARAMS)
+# -----------------------------------------------------------------------
+# SEE (Static Exchange Evaluation)
+# -----------------------------------------------------------------------
 
-    if is_maximizing:
-        if stand_pat >= beta: return beta
-        alpha = max(alpha, stand_pat)
+PIECE_ORDER_VALUE = {
+    '♙': 1, '♟': 1,
+    '♘': 3, '♞': 3,
+    '♗': 3, '♝': 3,
+    '♖': 5, '♜': 5,
+    '♕': 9, '♛': 9,
+    '♔': 10000, '♚': 10000,
+    ' ': 0,
+}
+
+
+def _attackers_to_square(board, r, c, by_color):
+    """Returnerar en sorterad lista (billigast först) med (ruta, pjäsvärde)
+    för alla pjäser av by_color som angriper (r, c). Används av SEE för att
+    simulera en hel utbytesföljd utan att behöva göra riktiga drag/ångra."""
+    attackers = []
+
+    if by_color == 'white':
+        own_set = frozenset('♙♘♗♖♕♔')
+        pawn_dr, pawn_piece = 1, '♙'
     else:
-        if stand_pat <= alpha: return alpha
-        beta = min(beta, stand_pat)
+        own_set = frozenset('♟♞♝♜♛♚')
+        pawn_dr, pawn_piece = -1, '♟'
 
-    if q_depth >= 10: return stand_pat
+    # Bönder
+    pr = r + pawn_dr
+    for dc in (-1, 1):
+        pc = c + dc
+        if 0 <= pr < 8 and 0 <= pc < 8 and board[pr][pc] == pawn_piece:
+            attackers.append(((pr, pc), PIECE_ORDER_VALUE[pawn_piece]))
 
-    capture_moves = [m for m in moves if _is_capture_move(board, state, m)]
-    capture_moves = order_moves(capture_moves, board)
+    # Springare
+    knight = '♘' if by_color == 'white' else '♞'
+    for dr, dc in ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)):
+        nr, nc = r + dr, c + dc
+        if 0 <= nr < 8 and 0 <= nc < 8 and board[nr][nc] == knight:
+            attackers.append(((nr, nc), PIECE_ORDER_VALUE[knight]))
 
-    if not capture_moves: return stand_pat
+    # Kung
+    king = '♔' if by_color == 'white' else '♚'
+    for dr in (-1, 0, 1):
+        for dc in (-1, 0, 1):
+            if dr == 0 and dc == 0:
+                continue
+            kr, kc = r + dr, c + dc
+            if 0 <= kr < 8 and 0 <= kc < 8 and board[kr][kc] == king:
+                attackers.append(((kr, kc), PIECE_ORDER_VALUE[king]))
 
-    if is_maximizing:
-        for move in capture_moves:
-            record = apply_move(board, state, move[0], move[1])
-            try:
-                # Skicka med history även här!
-                eval_val = quiescence_search(board, state, alpha, beta, False, history, q_depth + 1, ENGINE_PARAMS)
-            finally:
-                undo_move(board, state, record)
-            if eval_val >= beta: return beta
-            alpha = max(alpha, eval_val)
-        return alpha
-    else:
-        for move in capture_moves:
-            record = apply_move(board, state, move[0], move[1])
-            try:
-                # Skicka med history även här!
-                eval_val = quiescence_search(board, state, alpha, beta, True, history, q_depth + 1, ENGINE_PARAMS)
-            finally:
-                undo_move(board, state, record)
-            if eval_val <= alpha: return alpha
-            beta = min(beta, eval_val)
-        return beta
+    # Torn/Dam (raka linjer)
+    rook_like = {'♖', '♕'} if by_color == 'white' else {'♜', '♛'}
+    for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        rr, rc = r + dr, c + dc
+        while 0 <= rr < 8 and 0 <= rc < 8:
+            p = board[rr][rc]
+            if p != ' ':
+                if p in rook_like:
+                    attackers.append(((rr, rc), PIECE_ORDER_VALUE[p]))
+                break
+            rr += dr
+            rc += dc
+
+    # Löpare/Dam (diagonaler)
+    bishop_like = {'♗', '♕'} if by_color == 'white' else {'♝', '♛'}
+    for dr, dc in ((-1, -1), (-1, 1), (1, -1), (1, 1)):
+        rr, rc = r + dr, c + dc
+        while 0 <= rr < 8 and 0 <= rc < 8:
+            p = board[rr][rc]
+            if p != ' ':
+                if p in bishop_like:
+                    attackers.append(((rr, rc), PIECE_ORDER_VALUE[p]))
+                break
+            rr += dr
+            rc += dc
+
+    attackers.sort(key=lambda x: x[1])
+    return attackers
 
 
-def get_position_hash(board, color, state):
-    """Skapar en unik nyckel för en ställning (bräde, tur, och state-rättigheter)."""
-    state_key = (
-        state.white_king_moved, state.black_king_moved,
-        state.rook_a1_moved, state.rook_h1_moved,
-        state.rook_a8_moved, state.rook_h8_moved,
-        state.en_passant_target
-    )
-    # Konverterar brädet till en tuple av tuples så att det är hashbart (immutable)
-    board_tuple = tuple(tuple(row) for row in board)
-    return (board_tuple, color, state_key)
+def static_exchange_eval(board, move):
+    """Simulerar en fullständig utbytesföljd på målrutan UTAN att röra det
+    riktiga brädet/state (allt sker på en kopia), och returnerar nettovinsten
+    i pjäspoäng (positivt = lönsamt slag för den som drar).
 
-def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PARAMS=ENGINE_PARAMS):
-    if time.time() - search_start_time > time_limit_seconds:
-        raise TimeoutError()
+    Standardalgoritm: båda sidor tar tillbaka med sin billigaste tillgängliga
+    pjäs tills ingen vill/kan fortsätta (negamax över utbytesserien)."""
+    (sr, sc), (er, ec) = move
+    attacker_piece = board[sr][sc]
+    target_piece = board[er][ec]
+    if target_piece == ' ':
+        return 0  # tyst drag (en passant hanteras separat i _is_capture_move)
 
-    current_color = 'white' if is_maximizing else 'black'
-    original_alpha = alpha
-    original_beta = beta
-    
-    moves = get_all_legal_moves(current_color, board, state)
-    
-    if not moves:
-        if is_check(board, current_color, state):
-            return _terminal_score(current_color, depth)
-        else:
-            return 0
-            
-    board_hash = get_position_hash(board, current_color, state)
-    seen_on_path = history.get(board_hash, 0)
+    attacker_color = 'white' if attacker_piece in '♙♘♗♖♕♔' else 'black'
+    defender_color = 'black' if attacker_color == 'white' else 'white'
 
-    if seen_on_path >= 2:
-        return 0  # En tre-faldig upprepning är alltid remi
-    
-    history[board_hash] = seen_on_path + 1
-    use_cache = (seen_on_path == 0)
+    board_copy = [row[:] for row in board]
+    board_copy[er][ec] = attacker_piece
+    board_copy[sr][sc] = ' '
 
-    if use_cache and board_hash in cache:
-        cached_eval, cached_depth, node_type = cache[board_hash]
-        if cached_depth >= depth:
-            if node_type == 'EXACT':
-                history[board_hash] -= 1
-                return cached_eval
-            elif node_type == 'LOWERBOUND' and cached_eval >= beta:
-                history[board_hash] -= 1
-                return cached_eval
-            elif node_type == 'UPPERBOUND' and cached_eval <= alpha:
-                history[board_hash] -= 1
-                return cached_eval
+    gain = [PIECE_ORDER_VALUE[target_piece]]
+    current_attacker_value = PIECE_ORDER_VALUE[attacker_piece]
+    side = defender_color
 
-    if depth == 0:
-        result = quiescence_search(board, state, alpha, beta, is_maximizing, history, 0, ENGINE_PARAMS)
-        if use_cache:
-            cache[board_hash] = (result, depth, 'EXACT')
-        history[board_hash] -= 1
-        return result
+    while True:
+        attackers = _attackers_to_square(board_copy, er, ec, side)
+        if not attackers:
+            break
+        (fr, fc), val = attackers[0]
+        gain.append(current_attacker_value - gain[-1])
+        board_copy[er][ec] = board_copy[fr][fc]
+        board_copy[fr][fc] = ' '
+        current_attacker_value = val
+        side = 'black' if side == 'white' else 'white'
 
-    moves = order_moves(moves, board)
+    # Vik ihop utbytesserien bakifrån (negamax): varje sida väljer att
+    # AVBRYTA utbytet (dvs. inte återta) om det skulle bli en förlustaffär,
+    # så varje steg tar det bästa av "fortsätt utbytet" vs "sluta här".
+    for i in range(len(gain) - 2, -1, -1):
+        gain[i] = min(gain[i], -gain[i + 1])
+    return gain[0]
 
-    if is_maximizing:
-        max_eval = float('-inf')
-        for move in moves:
-            record = apply_move(board, state, move[0], move[1])
-            try:
-                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, ENGINE_PARAMS)
-            finally:
-                undo_move(board, state, record)
-            max_eval = max(max_eval, eval_val)
-            alpha = max(alpha, eval_val)
-            if beta <= alpha: break
-        if use_cache:
-            if max_eval <= original_alpha:
-                node_type = 'UPPERBOUND'
-            elif max_eval >= beta:
-                node_type = 'LOWERBOUND'
-            else:
-                node_type = 'EXACT'
-            cache[board_hash] = (max_eval, depth, node_type)
-        history[board_hash] -= 1
-        return max_eval
-    else:
-        min_eval = float('inf')
-        for move in moves:
-            record = apply_move(board, state, move[0], move[1])
-            try:
-                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, ENGINE_PARAMS)
-            finally:
-                undo_move(board, state, record)
-            min_eval = min(min_eval, eval_val)
-            beta = min(beta, eval_val)
-            if beta <= alpha: break
-        if use_cache:
-            if min_eval >= original_beta:
-                node_type = 'LOWERBOUND'
-            elif min_eval <= alpha:
-                node_type = 'UPPERBOUND'
-            else:
-                node_type = 'EXACT'
-            cache[board_hash] = (min_eval, depth, node_type)
-        history[board_hash] -= 1
-        return min_eval
-    
-def get_best_move(board, depth, color, state, history=None, params=None):
-    global cache, search_start_time, time_limit_seconds
-
-    search_start_time = time.time()
-    time_limit_seconds = DEFAULT_TIME_LIMIT_SECONDS  # Aktivera alltid ordinarie tänktid
-
-    is_white_turn = (color == 'white')
-
-    if history is None:
-        history = {}
-        
-    # LÄGG TILL DETTA: Om ingen parameter skickas in, använd standard-dictionaryn
-    if params is None:
-        params = ENGINE_PARAMS
-        
-    moves = get_all_legal_moves(color, board, state)
-    if not moves:
-        return None
-        
-    best_move_overall = moves[0]
-    best_value = float('-inf') if color == 'white' else float('inf')
-    search_depth = max(1, int(round(float(depth))))
-
-    try:
-        for current_depth in range(1, search_depth + 1):
-            moves = order_moves(moves, board, best_move_overall)
-
-            best_move_for_this_depth = None
-            best_value_for_this_depth = float('-inf') if color == 'white' else float('inf')
-            
-            # Startvärden för alpha-beta-beskärning i roten
-            alpha = float('-inf')
-            beta = float('inf')
-
-            # Vi räknar igenom drag för detta djup
-            for move in moves:
-                record = apply_move(board, state, move[0], move[1])
-                try:
-                    # HÄR ÄR ÄNDRINGEN: Skicka in params i argumentet ENGINE_PARAMS
-                    move_value = minimax(board, state, current_depth - 1, alpha, beta, not is_white_turn, history, ENGINE_PARAMS=params)
-                finally:
-                    undo_move(board, state, record)
-
-                if color == 'white':
-                    if move_value > best_value_for_this_depth:
-                        best_value_for_this_depth = move_value
-                        best_move_for_this_depth = move
-                    alpha = max(alpha, move_value)  # Uppdatera alpha!
-                else:
-                    if move_value < best_value_for_this_depth:
-                        best_value_for_this_depth = move_value
-                        best_move_for_this_depth = move
-                    beta = min(beta, move_value)    # Uppdatera beta!
-
-            # Om loopen nådde hit har HELA djupet slutförts utan tidsavbrott.
-            # Först NU uppdaterar vi det officiella bästa draget!
-            if best_move_for_this_depth is not None:
-                best_move_overall = best_move_for_this_depth
-                best_value = best_value_for_this_depth
-
-    except TimeoutError:
-        # Om tiden tar slut mitt i ett djup kastas undantaget hit.
-        print("Tiden tog slut – använder resultat från föregående färdiga djup.")
-    
-    print("Cache size:", len(cache), "entries")
-    print("in MB:", len(cache) * 64 / (1024 * 1024))
-    print("Best move found:", best_move_overall, "with evaluation:", best_value)
-    return best_move_overall

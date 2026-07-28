@@ -35,8 +35,8 @@ from chess_rules import (
     undo_move, 
     get_position_hash
 )
-from rating import get_best_move, evaluate_board
-
+from rating import evaluate_board
+from Q_search import quiescence_search, get_best_move
 
 SEARCH_DEPTH = 2000000
 MAX_MOVES = 3000  # säkerhetsspärr - ingen 50-dragsregel/remi-detektion finns än,
@@ -218,21 +218,23 @@ def move_to_san(board, state, move, current_color, is_check_res, is_mate_res):
     return san
 
 ENGINE_PARAMS = {
-    "KING_SAFETY_BONUS": 5,
-    "CONTROL_CENTER_BONUS": 0.5,
-    "BREAKING_PAWN_CHAINS_BONUS": 1,
-    "bishop_pair_bonus": 0.5,
-    "knight_on_the_rim_penalty": 0.5,
-    "pawn_chain_bonus": 2,
-    "PASSED_PAWN_BONUS": 0.5,
-    "enemy_king_corner_bonus": 1,
-    "enemy_king_center_bonus": 0.5,
-    "hanging_piece_penalty": 0.5,
-    "squares_controlled_bonus": 0.01,
-    "pieac_pos_bonus": 0.01,
-    "OPEN_RATE": 0.6,
-    "END_RATE": 0.6
-}
+    "BREAKING_PAWN_CHAINS_BONUS": 0.0,
+    "CONTROL_CENTER_BONUS": 0.0,
+    "END_RATE": 0.1999,
+    "KING_SAFETY_BONUS": 3.4532,
+    "OPEN_RATE": 0.1693,
+    "PASSED_PAWN_BONUS": 0.0001,
+    "bishop_pair_bonus": 0.0,
+    "enemy_king_center_bonus": 0.005,
+    "enemy_king_corner_bonus": 0.01,
+    "hanging_piece_penalty": 0.0,
+    "isolated_pawn_penalty": 12.2113,
+    "knight_on_the_rim_penalty": 0.0,
+    "pawn_chain_bonus": 0.0,
+    "pieac_pos_bonus": 0.0,
+    "rook_open_file_bonus": 13.4224,
+    "squares_controlled_bonus": 0.0,
+    }
 
 def move_to_uci(board, move):
     """Översätter motorns drag ((sr, sc), (er, ec)) till UCI (t.ex. 'e2e4')"""
@@ -403,22 +405,26 @@ def play_game_self_play(fen, params_white, params_black, num_games=1):
 
 def main():
     # Optimerade parametrar baserade på Stockfish-analys
-    best_params = {
-        "BREAKING_PAWN_CHAINS_BONUS": 0.01,
-        "CONTROL_CENTER_BONUS": 3.3876,
-        "END_RATE": 0.3995,
-        "KING_SAFETY_BONUS": 7.0014,
-        "OPEN_RATE": 0.4542,
-        "PASSED_PAWN_BONUS": 0.8247,
-        "bishop_pair_bonus": 2.5685,
-        "enemy_king_center_bonus": 1.1242,
-        "enemy_king_corner_bonus": 1.0072,
-        "hanging_piece_penalty": 2.3199,
-        "knight_on_the_rim_penalty": 2.7241,
-        "pawn_chain_bonus": 0.01,
-        "pieac_pos_bonus": 0.0588,
-        "squares_controlled_bonus": 0.0579,
+# Perfekt Optimerade Parametrar (MAE=36.90)
+    best_params = best_params = {
+    "BREAKING_PAWN_CHAINS_BONUS": 1.0,
+    "CONTROL_CENTER_BONUS": 0.25,
+    "END_RATE": 0.3,
+    "KING_SAFETY_BONUS": 1.123,
+    "OPEN_RATE": 0.1875,
+    "PASSED_PAWN_BONUS": 0.5,
+    "bishop_pair_bonus": 0.5,
+    "enemy_king_center_bonus": 0.5,
+    "enemy_king_corner_bonus": 1.0,
+    "hanging_piece_penalty": 1.5,
+    "isolated_pawn_penalty": 0.5,
+    "knight_on_the_rim_penalty": 0.5,
+    "pawn_chain_bonus": 0.5,
+    "pieac_pos_bonus": 0.125,
+    "rook_open_file_bonus": 0.5,
+    "squares_controlled_bonus": 0.01,
     }
+
     play_game_self_play("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", best_params, best_params, num_games=1)
 
 

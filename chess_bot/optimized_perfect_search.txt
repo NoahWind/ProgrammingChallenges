@@ -1,0 +1,19 @@
+# Perfekt Optimerade Parametrar (MAE=43.85)
+best_params = {
+    "BREAKING_PAWN_CHAINS_BONUS": 1.0,
+    "CONTROL_CENTER_BONUS": 0.25,
+    "END_RATE": 0.3,
+    "KING_SAFETY_BONUS": 1.123,
+    "OPEN_RATE": 0.1875,
+    "PASSED_PAWN_BONUS": 0.5,
+    "bishop_pair_bonus": 0.5,
+    "enemy_king_center_bonus": 0.5,
+    "enemy_king_corner_bonus": 1.0,
+    "hanging_piece_penalty": 1.5,
+    "isolated_pawn_penalty": 0.5,
+    "knight_on_the_rim_penalty": 0.5,
+    "pawn_chain_bonus": 0.5,
+    "pieac_pos_bonus": 0.125,
+    "rook_open_file_bonus": 0.5,
+    "squares_controlled_bonus": 0.01,
+}
