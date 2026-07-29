@@ -67,26 +67,25 @@ def _has_any_pawns(board):
 
 def get_game_phase_weights(state, open_rate=0.6, end_rate=0.6):
     """
-    Beräknar a (öppning), b (mittspel) och c (slutspel) baserat på pjäser kvar.
-    
-    - open_rate: Bestämmer hur snabbt öppningen fasas ut (högre värde = öppningen hänger med längre).
-    - end_rate: Bestämmer när slutspelet kickar in (högre värde = slutspelet börjar tidigare).
+    Beräknar a (öppning), b (mittspel) och c (slutspel) baserat på pjäser kvar 
+    samt dina inställda parametrar för open_rate och end_rate från ENGINE_PARAMS.
     """
     total_pieces = len(state.white_pieces) + len(state.black_pieces)
     
     # Normalisera p från 1.0 (fullt bräde) till 0.0 (bara kungar kvar)
     p = max(0.0, min(1.0, (total_pieces - 2) / 30.0))
     
-    # a = Öppningsvikt
+    # Använd open_rate för att styra hur länge öppningen hänger med
     a = max(0.0, (p - (1.0 - open_rate)) / open_rate) if open_rate > 0 else 0.0
     
-    # b = Mittspelsvikt (toppar i mitten av partiet)
-    b = 1.0 - abs(p - 0.5) * 2
-    
-    # c = Slutspelsvikt
+    # Använd end_rate för att styra när slutspelet kickar in tidigt/sent
     c = max(0.0, (end_rate - p) / end_rate) if end_rate > 0 else 0.0
     
+    # Mittspelet fyller ut resten
+    b = max(0.0, 1.0 - a - c)
+    
     return a, b, c
+
 
 def rook_on_the_seventh_rank(board, color, state):
     """
@@ -100,23 +99,78 @@ def rook_on_the_seventh_rank(board, color, state):
             return True
     return False
 
+def cant_even_mate(board, state):
+    """
+    Returnerar True om det är omöjligt att sätta matt med de pjäser som finns kvar på brädet.
+    """
+    white_pieces = []
+    black_pieces = []
+    
+    # Skanna brädet direkt för att undvika typ-krockar
+    for r in range(8):
+        for c in range(8):
+            piece = board[r][c]
+            if piece in WHITE_PIECES:
+                white_pieces.append((piece, r, c))
+            elif piece in BLACK_PIECES:
+                black_pieces.append((piece, r, c))
+                
+    w_symbols = [p[0] for p in white_pieces]
+    b_symbols = [p[0] for p in black_pieces]
+
+    # Om båda sidor bara har kungar kvar
+    if len(w_symbols) == 1 and len(b_symbols) == 1:
+        return True
+
+    # Om en sida har bara kung och den andra sidan har kung + löpare eller kung + springare
+    if (len(w_symbols) == 2 and any(p in ('♗', '♘') for p in w_symbols) and len(b_symbols) == 1) or \
+       (len(b_symbols) == 2 and any(p in ('♝', '♞') for p in b_symbols) and len(w_symbols) == 1):
+        return True
+
+    # Om en sida har kung + 2 springare och den andra bara har kung
+    if (len(w_symbols) == 3 and w_symbols.count('♘') == 2 and len(b_symbols) == 1) or \
+       (len(b_symbols) == 3 and b_symbols.count('♞') == 2 and len(w_symbols) == 1):
+        return True
+
+    # Om båda har kung + löpare, kolla om löparna går på samma färg
+    if len(w_symbols) == 2 and len(b_symbols) == 2:
+        white_bishop = next(((r, c) for p, r, c in white_pieces if p == '♗'), None)
+        black_bishop = next(((r, c) for p, r, c in black_pieces if p == '♝'), None)
+        
+        if white_bishop and black_bishop:
+            pos_w = white_bishop
+            pos_b = black_bishop
+            color_w = (pos_w[0] + pos_w[1]) % 2
+            color_b = (pos_b[0] + pos_b[1]) % 2
+            if color_w == color_b:
+                return True
+
+    return False
 
 def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PARAMS):
     score = float(state.material_score)
 
-
-    
     pos_key = get_position_hash(board, current_color, state)
     if (history.get(pos_key, 0) >= 2
             and abs(state.material_score) < 5
             and not _has_any_pawns(board)):
         return 0 
+
+    if is_stalemate(board, current_color, state):
+        return 0
+    if cant_even_mate(board, state):
+        return 0
+        
     moves = get_all_legal_moves(current_color, board, state)
     enemy_color = 'black' if current_color == 'white' else 'white'
     enemy_moves = get_all_legal_moves(enemy_color, board, state)
     
-    
-    a, b, c = get_game_phase_weights(state, ENGINE_PARAMS["OPEN_RATE"], ENGINE_PARAMS["END_RATE"])
+    # Hämta våra 3 vikter!
+    a, b, c = get_game_phase_weights(
+        state, 
+        ENGINE_PARAMS.get("OPEN_RATE", 0.6), 
+        ENGINE_PARAMS.get("END_RATE", 0.6)
+    )
 
     if state.half_move_clock > 80:
         if score < 0:
@@ -124,56 +178,28 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
         elif score > 0:
             score -= (state.half_move_clock - 80) * 0.5
     
-    if is_king_safe(board, 'white', state): score += ENGINE_PARAMS["KING_SAFETY_BONUS"] * a + ENGINE_PARAMS["KING_SAFETY_BONUS"] * b + ENGINE_PARAMS["KING_SAFETY_BONUS"] * c
-    if is_king_safe(board, 'black', state): score -= ENGINE_PARAMS["KING_SAFETY_BONUS"] * a + ENGINE_PARAMS["KING_SAFETY_BONUS"] * b + ENGINE_PARAMS["KING_SAFETY_BONUS"] * c
+    # ---------------------------------------------------------
+    # GRUPP 1: Öppning & Mittspel (Tonar ut i slutspelet)
+    # Vi multiplicerar med (a + b)
+    # ---------------------------------------------------------
+    if is_king_safe(board, 'white', state): score += ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
+    if is_king_safe(board, 'black', state): score -= ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
 
-    if is_controling_center(board, 'white'): score += ENGINE_PARAMS["CONTROL_CENTER_BONUS"]  * a + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * b + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * c
-    if is_controling_center(board, 'black'): score -= ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * a + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * b + ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * c
+    if is_controling_center(board, 'white'): score += ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * (a + b)
+    if is_controling_center(board, 'black'): score -= ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * (a + b)
 
-    if breakt_pawn_chains(board, 'white', state): score -= ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * a + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * b + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * c
-    if breakt_pawn_chains(board, 'black', state): score += ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * a + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * b + ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"] * c
+    black_sqr = how_many_squares_do_i_control(board, 'black', state, enemy_moves)
+    white_sqr = how_many_squares_do_i_control(board, 'white', state, moves)
+    if black_sqr > 0: score -= ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * (a + b)
+    if white_sqr > 0: score += ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * (a + b)
 
-    if bishop_pair(board, 'white', state): score += ENGINE_PARAMS["bishop_pair_bonus"] * a + ENGINE_PARAMS["bishop_pair_bonus"] * b + ENGINE_PARAMS["bishop_pair_bonus"] * c
-    if bishop_pair(board, 'black', state): score -= ENGINE_PARAMS["bishop_pair_bonus"] * a + ENGINE_PARAMS["bishop_pair_bonus"] * b + ENGINE_PARAMS["bishop_pair_bonus"] * c
+    if knight_on_the_rim(board, 'white', state): score -= ENGINE_PARAMS["knight_on_the_rim_penalty"] * (a + b)
+    if knight_on_the_rim(board, 'black', state): score += ENGINE_PARAMS["knight_on_the_rim_penalty"] * (a + b)
 
-    if knight_on_the_rim(board, 'white', state): score -= ENGINE_PARAMS["knight_on_the_rim_penalty"] * a + ENGINE_PARAMS["knight_on_the_rim_penalty"] * b + ENGINE_PARAMS["knight_on_the_rim_penalty"] * c
-    if knight_on_the_rim(board, 'black', state): score += ENGINE_PARAMS["knight_on_the_rim_penalty"] * a + ENGINE_PARAMS["knight_on_the_rim_penalty"] * b + ENGINE_PARAMS["knight_on_the_rim_penalty"] * c
-
-    if isolated_pawn_penalty_or_doubling(board, 'white', state): score -= ENGINE_PARAMS["isolated_pawn_penalty"] * a + ENGINE_PARAMS["isolated_pawn_penalty"] * b + ENGINE_PARAMS["isolated_pawn_penalty"] * c
-    if isolated_pawn_penalty_or_doubling(board, 'black', state): score += ENGINE_PARAMS["isolated_pawn_penalty"] * a + ENGINE_PARAMS["isolated_pawn_penalty"] * b + ENGINE_PARAMS["isolated_pawn_penalty"] * c
-
-    if Rook_Open_Files(board, 'white', state): score += ENGINE_PARAMS["rook_open_file_bonus"] * a + ENGINE_PARAMS["rook_open_file_bonus"] * b + ENGINE_PARAMS["rook_open_file_bonus"] * c
-    if Rook_Open_Files(board, 'black', state): score -= ENGINE_PARAMS["rook_open_file_bonus"] * a + ENGINE_PARAMS["rook_open_file_bonus"] * b + ENGINE_PARAMS["rook_open_file_bonus"] * c
-
-    white_moves = moves if current_color == 'white' else enemy_moves
-    black_moves = enemy_moves if current_color == 'white' else moves
-
-    black_sqr = how_many_squares_do_i_control(board, 'black', state, black_moves)
-    white_sqr = how_many_squares_do_i_control(board, 'white', state, white_moves)
-
-    if black_sqr > 0: score -= ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * a + ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * b + ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * c
-    if white_sqr > 0: score += ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * a + ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * b + ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * c
-
-    pst_w, hang_w = evaluate_pieces_and_threats(board, state, 'white')
-    pst_b, hang_b = evaluate_pieces_and_threats(board, state, 'black')
-
-    score += pst_w * ENGINE_PARAMS["pieac_pos_bonus"] * a + pst_w * ENGINE_PARAMS["pieac_pos_bonus"] * b + pst_w * ENGINE_PARAMS["pieac_pos_bonus"] * c
-    score += pst_b * ENGINE_PARAMS["pieac_pos_bonus"] * a + pst_b * ENGINE_PARAMS["pieac_pos_bonus"] * b + pst_b * ENGINE_PARAMS["pieac_pos_bonus"] * c
-    score += hang_w * ENGINE_PARAMS["hanging_piece_penalty"] * a + hang_w * ENGINE_PARAMS["hanging_piece_penalty"] * b + hang_w * ENGINE_PARAMS["hanging_piece_penalty"] * c
-    score += hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * a + hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * b + hang_b * ENGINE_PARAMS["hanging_piece_penalty"] * c
-
-
-    if passed_pawn_score(board, 'white', state): score += a*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + b*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + c*ENGINE_PARAMS["PASSED_PAWN_BONUS"]
-    if passed_pawn_score(board, 'black', state): score -= a*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + b*ENGINE_PARAMS["PASSED_PAWN_BONUS"] + c*ENGINE_PARAMS["PASSED_PAWN_BONUS"]
-
-    # Pawn chains returnerar bara True/False, så där behåller vi if-satsen
-    if pawn_chain(board, 'white', state): score += a*ENGINE_PARAMS["pawn_chain_bonus"] + b*ENGINE_PARAMS["pawn_chain_bonus"] + c*ENGINE_PARAMS["pawn_chain_bonus"]
-    if pawn_chain(board, 'black', state): score -= a*ENGINE_PARAMS["pawn_chain_bonus"] + b*ENGINE_PARAMS["pawn_chain_bonus"] + c*ENGINE_PARAMS["pawn_chain_bonus"]
-
-    if rook_on_the_seventh_rank(board, 'white', state): score += a*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + b*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + c*ENGINE_PARAMS["rook_on_seventh_rank_bonus"]
-    if rook_on_the_seventh_rank(board, 'black', state): score -= a*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + b*ENGINE_PARAMS["rook_on_seventh_rank_bonus"] + c*ENGINE_PARAMS["rook_on_seventh_rank_bonus"]
-
-    # Här lägger vi till returvärdena direkt (de hanterar redan +/- beroende på färg)
+    # ---------------------------------------------------------
+    # GRUPP 2: Rent Slutspel (Noll i början, starkt i slutet)
+    # Vi multiplicerar med c
+    # ---------------------------------------------------------
     corner_w = endgame_push_king_enemy_to_corner(board, 'white', state)
     corner_b = endgame_push_king_enemy_to_corner(board, 'black', state)
     score += corner_w * ENGINE_PARAMS["enemy_king_corner_bonus"] * c
@@ -184,15 +210,45 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     score += center_w * ENGINE_PARAMS["enemy_king_center_bonus"] * c
     score += center_b * ENGINE_PARAMS["enemy_king_center_bonus"] * c
 
-    white_in_check = is_check(board, 'white', state)
-    black_in_check = is_check(board, 'black', state)
+    score += get_endgame_bonus(board, 'white', state) * c
+    score -= get_endgame_bonus(board, 'black', state) * c
+    score += king_confinement_and_distance_bonus(state) * c
 
-    if len(state.white_pieces) + len(state.black_pieces) < 6:
-        score += get_endgame_bonus(board, 'white', state)
-        score -= get_endgame_bonus(board, 'black', state)
-        score += king_confinement_and_distance_bonus(state)
+    # ---------------------------------------------------------
+    # GRUPP 3: Extra viktigt i slutspelet (Bra alltid, men bäst i slutet)
+    # Vi multiplicerar med (1.0 + c) för att ge en extra boost
+    # ---------------------------------------------------------
+    if passed_pawn_score(board, 'white', state): score += ENGINE_PARAMS["PASSED_PAWN_BONUS"] * (1.0 + c)
+    if passed_pawn_score(board, 'black', state): score -= ENGINE_PARAMS["PASSED_PAWN_BONUS"] * (1.0 + c)
 
+    if isolated_pawn_penalty_or_doubling(board, 'white', state): score -= ENGINE_PARAMS["isolated_pawn_penalty"] * (1.0 + c)
+    if isolated_pawn_penalty_or_doubling(board, 'black', state): score += ENGINE_PARAMS["isolated_pawn_penalty"] * (1.0 + c)
 
+    if rook_on_the_seventh_rank(board, 'white', state): score += ENGINE_PARAMS["rook_on_seventh_rank_bonus"] * (1.0 + c)
+    if rook_on_the_seventh_rank(board, 'black', state): score -= ENGINE_PARAMS["rook_on_seventh_rank_bonus"] * (1.0 + c)
+
+    if bishop_pair(board, 'white', state): score += ENGINE_PARAMS["bishop_pair_bonus"] * (1.0 + c)
+    if bishop_pair(board, 'black', state): score -= ENGINE_PARAMS["bishop_pair_bonus"] * (1.0 + c)
+
+    # ---------------------------------------------------------
+    # GRUPP 4: Konstanta regler (Lika bra genom hela spelet)
+    # Vi behöver inte multiplicera dem (dvs de gångas med 1.0)
+    # ---------------------------------------------------------
+    if breakt_pawn_chains(board, 'white', state): score -= ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"]
+    if breakt_pawn_chains(board, 'black', state): score += ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"]
+
+    if Rook_Open_Files(board, 'white', state): score += ENGINE_PARAMS["rook_open_file_bonus"]
+    if Rook_Open_Files(board, 'black', state): score -= ENGINE_PARAMS["rook_open_file_bonus"]
+    
+    if pawn_chain(board, 'white', state): score += ENGINE_PARAMS["pawn_chain_bonus"]
+    if pawn_chain(board, 'black', state): score -= ENGINE_PARAMS["pawn_chain_bonus"]
+
+    pst_w, hang_w = evaluate_pieces_and_threats(board, state, 'white')
+    pst_b, hang_b = evaluate_pieces_and_threats(board, state, 'black')
+    score += pst_w * ENGINE_PARAMS["pieac_pos_bonus"]
+    score += pst_b * ENGINE_PARAMS["pieac_pos_bonus"]
+    score += hang_w * ENGINE_PARAMS["hanging_piece_penalty"]
+    score += hang_b * ENGINE_PARAMS["hanging_piece_penalty"]
 
     return score
 # ==========================================

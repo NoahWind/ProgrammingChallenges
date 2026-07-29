@@ -96,7 +96,7 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
             # SEE: hoppa över klart förlustaffärer (t.ex. Dxb2 mot en
             # välförsvarad bonde) - de är i praktiken aldrig rätt i tyst läge.
             if static_exchange_eval(board, move) < 0:
-                pass
+                continue
 
             record = apply_move(board, state, move[0], move[1])
             try:

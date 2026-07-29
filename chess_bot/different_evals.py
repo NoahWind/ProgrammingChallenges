@@ -19,6 +19,19 @@ def _state_key(state):
 # Piece-Square Tables (PST) – värderar var pjäserna står (från vits perspektiv)
 # För svart inverteras raderna automatiskt.
 
+# King Piece-Square Table för öppning och mittspel
+# Straffar kungen hårt i centrum, belönar kanten och rockad-rutorna (g1/h1/b1/c1)
+KING_MG_PST = [
+    [-50, -40, -40, -50, -50, -40, -40, -50],
+    [-50, -40, -40, -50, -50, -40, -40, -50],
+    [-50, -40, -40, -50, -50, -40, -40, -50],
+    [-50, -40, -40, -50, -50, -40, -40, -50],
+    [-30, -30, -30, -40, -40, -30, -30, -30],
+    [-10, -20, -20, -20, -20, -20, -20, -10],
+    [ 20,  20,   0,   0,   0,   0,  20,  20],
+    [ 30,  40,  10, -20, -20,  10,  40,  30]
+]
+
 PAWN_PST = [
     [ 0,  0,  0,  0,  0,  0,  0,  0],
     [50, 50, 50, 50, 50, 50, 50, 50],
@@ -75,8 +88,6 @@ QUEEN_PST = [
 ]
 
 def evaluate_pieces_and_threats(board, state, color):
-    """Beräknar PST och hängande pjäser för en specifik färg 
-    och returnerar (pst_score, hanging_score)."""
     pst_score = 0.0
     hanging_score = 0.0
     
@@ -89,13 +100,14 @@ def evaluate_pieces_and_threats(board, state, color):
         if piece == ' ':
             continue
         
-        # PST-beräkning
+        # PST-beräkning (nu med kungen inkluderad!)
         if color == 'white':
             if piece == '♙': pst_score += PAWN_PST[r][c] * 0.01
             elif piece == '♘': pst_score += KNIGHT_PST[r][c] * 0.01
             elif piece == '♗': pst_score += BISHOP_PST[r][c] * 0.01
             elif piece == '♖': pst_score += ROOK_PST[r][c] * 0.01
             elif piece == '♕': pst_score += QUEEN_PST[r][c] * 0.01
+            elif piece == '♔': pst_score += KING_MG_PST[r][c] * 0.01
         else:
             sr = 7 - r
             if piece == '♟': pst_score += PAWN_PST[sr][c] * 0.01
@@ -103,15 +115,15 @@ def evaluate_pieces_and_threats(board, state, color):
             elif piece == '♝': pst_score += BISHOP_PST[sr][c] * 0.01
             elif piece == '♜': pst_score += ROOK_PST[sr][c] * 0.01
             elif piece == '♛': pst_score += QUEEN_PST[sr][c] * 0.01
+            elif piece == '♚': pst_score += KING_MG_PST[sr][c] * 0.01
 
-        # Hängande pjäser-kontroll
+        # Hängande pjäser-kontroll (oförändrad)
         if piece != king_piece:
             if _is_square_attacked_fast(board, r, c, enemy_color):
                 if not _is_square_attacked_fast(board, r, c, color):
                     val = abs(PIECE_VALUES.get(piece, 0))
                     hanging_score -= val * 0.15
 
-    # Positivt för vit, negativt för svart (följer motorns konvention)
     mult = 1.0 if color == 'white' else -1.0
     return pst_score * mult, hanging_score * mult
 

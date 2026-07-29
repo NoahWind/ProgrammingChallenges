@@ -406,27 +406,28 @@ def play_game_self_play(fen, params_white, params_black, num_games=1, default_ti
 def main():
     # Optimerade parametrar baserade på Stockfish-analys
 # Perfekt Optimerade Parametrar (MAE=36.90)
-    THINKING_TIME = 0.6  # sekunder per drag
+    THINKING_TIME = 2  # sekunder per drag
     # Perfekt Optimerade Parametrar (MAE=0.95)
     best_params = {
-    "BREAKING_PAWN_CHAINS_BONUS": 0.001,
-    "CONTROL_CENTER_BONUS": 0.001,
-    "END_RATE": 0.0001,
-    "KING_SAFETY_BONUS": 0.0001,
-    "OPEN_RATE": 0.0001,
-    "PASSED_PAWN_BONUS": 0.001,
-    "bishop_pair_bonus": 0.0312,
-    "enemy_king_center_bonus": 0.5,
-    "enemy_king_corner_bonus": 1.0,
-    "hanging_piece_penalty": 0.0171,
-    "isolated_pawn_penalty": 0.0137,
-    "knight_on_the_rim_penalty": 0.0043,
-    "pawn_chain_bonus": 0.0085,
-    "pieac_pos_bonus": 0.0116,
-    "rook_open_file_bonus": 0.0043,
-    "squares_controlled_bonus": 0.001,
-    "rook_on_seventh_rank_bonus": 0.0001,
+        "OPEN_RATE": 0.3,                  # Hur länge öppningsfasen hänger med
+        "END_RATE": 0.3,                   # När slutspelet börjar kicka in
+        "BREAKING_PAWN_CHAINS_BONUS": 0.05,
+        "CONTROL_CENTER_BONUS": 0.2,       # Belöning för att kontrollera d4/d5/e4/e5
+        "KING_SAFETY_BONUS": 0.25,         # Håller kungen trygg bakom bönderna i början
+        "PASSED_PAWN_BONUS": 0.4,          # Fribönder blir extremt värdefulla i slutet
+        "bishop_pair_bonus": 0.3,          # Bonus för att ha båda löparna kvar
+        "enemy_king_center_bonus": 0.2,    # Hjälper till att driva kungen i slutspelet
+        "enemy_king_corner_bonus": 0.35,   # Belönar att tränga kungen mot kanten för matt
+        "hanging_piece_penalty": 1.0,      # Straffar hängande pjäser hårt
+        "isolated_pawn_penalty": 0.15,    # Straff för svaga, isolerade bönder
+        "knight_on_the_rim_penalty": 0.15, # Straffar springare på kanten ("knight on the rim is dim")
+        "pawn_chain_bonus": 0.1,           # Belönar starka bondekedjor
+        "pieac_pos_bonus": 1.0,            # Aktiverar dina Piece-Square Tables (PST) ordentligt!
+        "rook_on_seventh_rank_bonus": 0.3, # Stark bonus för torn på sjunde raden
+        "rook_open_file_bonus": 0.2,       # Belönar torn på öppna linjer
+        "squares_controlled_bonus": 0.01,  # Rymdkontroll / mobilitet
     }
+
 
 
     play_game_self_play("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", best_params, best_params, num_games=1, default_time_limit_seconds=THINKING_TIME)

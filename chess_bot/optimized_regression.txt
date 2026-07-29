@@ -1,0 +1,20 @@
+# Regression-optimerade parametrar (MAE=0.5396)
+best_params = {
+    "OPEN_RATE": 0.01,
+    "END_RATE": 0.01,
+    "BREAKING_PAWN_CHAINS_BONUS": 0.0,
+    "CONTROL_CENTER_BONUS": 0.0,
+    "KING_SAFETY_BONUS": 0.0,
+    "PASSED_PAWN_BONUS": 0.0,
+    "bishop_pair_bonus": 0.0,
+    "enemy_king_center_bonus": 0.0,
+    "enemy_king_corner_bonus": 0.0,
+    "hanging_piece_penalty": 0.0,
+    "isolated_pawn_penalty": 0.0,
+    "knight_on_the_rim_penalty": 0.0,
+    "pawn_chain_bonus": 0.0,
+    "pieac_pos_bonus": 0.0,
+    "rook_on_seventh_rank_bonus": 0.0,
+    "rook_open_file_bonus": 0.0,
+    "squares_controlled_bonus": 0.0,
+}
