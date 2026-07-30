@@ -118,12 +118,13 @@ def evaluate_pieces_and_threats(board, state, color):
             elif piece == '♚': pst_score += KING_MG_PST[sr][c] * 0.01
 
         # Hängande pjäser-kontroll (oförändrad)
+        # Hängande pjäser-kontroll
         if piece != king_piece:
             if _is_square_attacked_fast(board, r, c, enemy_color):
                 if not _is_square_attacked_fast(board, r, c, color):
                     val = abs(PIECE_VALUES.get(piece, 0))
-                    hanging_score -= val * 0.15
-
+                    # Tog bort * 0.15 här så att ENGINE_PARAMS får bestämma vikten
+                    hanging_score -= val
     mult = 1.0 if color == 'white' else -1.0
     return pst_score * mult, hanging_score * mult
 

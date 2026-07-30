@@ -193,10 +193,19 @@ def add_pawn_moves(board, row, col, color, raw_moves, captures_only, state: Game
 
     nr = row + direction
     if 0 <= nr < 8:
-        if not captures_only and board[nr][col] == ' ':
-            raw_moves.append(((row, col), (nr, col), False, False))
-            if row == start_row and board[row + 2 * direction][col] == ' ':
+        if board[nr][col] == ' ':
+            # Kolla om draget leder till sista raden (förvandling)
+            is_promotion = (nr == 0 or nr == 7)
+            
+            # Tillåt framryckning om vi antingen vill ha alla drag, 
+            # ELLER om vi bara vill ha captures men draget är en förvandling.
+            if not captures_only or is_promotion:
+                raw_moves.append(((row, col), (nr, col), False, False))
+                
+            # Dubbelsteg är aldrig förvandling, genereras bara när captures_only=False
+            if not captures_only and row == start_row and board[row + 2 * direction][col] == ' ':
                 raw_moves.append(((row, col), (row + 2 * direction, col), False, False))
+                
         for dc in (-1, 1):
             nc = col + dc
             if 0 <= nc < 8 and board[nr][nc] in opp_set:
@@ -207,7 +216,6 @@ def add_pawn_moves(board, row, col, color, raw_moves, captures_only, state: Game
         tr, tc = state.en_passant_target
         if tr == nr and abs(tc - col) == 1:
             raw_moves.append(((row, col), (tr, tc), True, False))
-
 
 # ---------------------------------------------------------------------
 # Hot / schack (Behåll exakt som den är i din kod!)

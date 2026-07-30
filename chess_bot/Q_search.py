@@ -77,8 +77,6 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
 
     if is_maximizing:
         for move in capture_moves:
-            # Delta pruning: även i bästa fall (vinner hela den slagna pjäsen)
-            # räcker det inte att komma över alpha -> hoppa över draget.
             (sr, sc), (er, ec) = move
             moving_piece = board[sr][sc]
             captured = board[er][ec]
@@ -149,7 +147,7 @@ def get_position_hash(board, color, state):
     board_tuple = tuple(tuple(row) for row in board)
     return (board_tuple, color, state_key)
 
-def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PARAMS=ENGINE_PARAMS):
+def minimax(board, state, depth, alpha, beta, is_maximizing, history, local_cache, ENGINE_PARAMS=ENGINE_PARAMS):
     if time.time() - search_start_time > time_limit_seconds:
         raise TimeoutError()
 
@@ -174,8 +172,9 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PAR
     history[board_hash] = seen_on_path + 1
     use_cache = (seen_on_path == 0)
 
-    if use_cache and board_hash in cache:
-        cached_eval, cached_depth, node_type = cache[board_hash]
+    # Använder lokala cachen
+    if use_cache and board_hash in local_cache:
+        cached_eval, cached_depth, node_type = local_cache[board_hash]
         if cached_depth >= depth:
             if node_type == 'EXACT':
                 history[board_hash] -= 1
@@ -189,8 +188,6 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PAR
 
     if depth == 0:
         result = quiescence_search(board, state, alpha, beta, is_maximizing, history, 0, ENGINE_PARAMS)
-        if use_cache:
-            cache[board_hash] = (result, depth, 'EXACT')
         history[board_hash] -= 1
         return result
 
@@ -201,7 +198,8 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PAR
         for move in moves:
             record = apply_move(board, state, move[0], move[1])
             try:
-                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, ENGINE_PARAMS)
+                # Skickar med local_cache rekursivt
+                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, local_cache, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
             max_eval = max(max_eval, eval_val)
@@ -214,7 +212,7 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PAR
                 node_type = 'LOWERBOUND'
             else:
                 node_type = 'EXACT'
-            cache[board_hash] = (max_eval, depth, node_type)
+            local_cache[board_hash] = (max_eval, depth, node_type)
         history[board_hash] -= 1
         return max_eval
     else:
@@ -222,7 +220,8 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PAR
         for move in moves:
             record = apply_move(board, state, move[0], move[1])
             try:
-                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, ENGINE_PARAMS)
+                # Skickar med local_cache rekursivt
+                eval_val = minimax(board, state, depth - 1, alpha, beta, not is_maximizing, history, local_cache, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
             min_eval = min(min_eval, eval_val)
@@ -235,12 +234,12 @@ def minimax(board, state, depth, alpha, beta, is_maximizing, history, ENGINE_PAR
                 node_type = 'UPPERBOUND'
             else:
                 node_type = 'EXACT'
-            cache[board_hash] = (min_eval, depth, node_type)
+            local_cache[board_hash] = (min_eval, depth, node_type)
         history[board_hash] -= 1
         return min_eval
     
 def get_best_move(board, depth, color, state, history=None, params=None, DEFAULT_TIME_LIMIT_SECONDS=5):
-    global cache, search_start_time, time_limit_seconds
+    global search_start_time, time_limit_seconds
 
     search_start_time = time.time()
     time_limit_seconds = DEFAULT_TIME_LIMIT_SECONDS  # Aktivera alltid ordinarie tänktid
@@ -250,9 +249,10 @@ def get_best_move(board, depth, color, state, history=None, params=None, DEFAULT
     if history is None:
         history = {}
         
-    # LÄGG TILL DETTA: Om ingen parameter skickas in, använd standard-dictionaryn
     if params is None:
         params = ENGINE_PARAMS
+        
+    local_cache = {}  # NY LOKAL CACHE FÖR DENNA SÖKNING
         
     moves = get_all_legal_moves(color, board, state)
     if not moves:
@@ -269,16 +269,14 @@ def get_best_move(board, depth, color, state, history=None, params=None, DEFAULT
             best_move_for_this_depth = None
             best_value_for_this_depth = float('-inf') if color == 'white' else float('inf')
             
-            # Startvärden för alpha-beta-beskärning i roten
             alpha = float('-inf')
             beta = float('inf')
 
-            # Vi räknar igenom drag för detta djup
             for move in moves:
                 record = apply_move(board, state, move[0], move[1])
                 try:
-                    # HÄR ÄR ÄNDRINGEN: Skicka in params i argumentet ENGINE_PARAMS
-                    move_value = minimax(board, state, current_depth - 1, alpha, beta, not is_white_turn, history, ENGINE_PARAMS=params)
+                    # Skickar med local_cache hit ner
+                    move_value = minimax(board, state, current_depth - 1, alpha, beta, not is_white_turn, history, local_cache, ENGINE_PARAMS=params)
                 finally:
                     undo_move(board, state, record)
 
@@ -286,24 +284,23 @@ def get_best_move(board, depth, color, state, history=None, params=None, DEFAULT
                     if move_value > best_value_for_this_depth:
                         best_value_for_this_depth = move_value
                         best_move_for_this_depth = move
-                    alpha = max(alpha, move_value)  # Uppdatera alpha!
+                    alpha = max(alpha, move_value)
                 else:
                     if move_value < best_value_for_this_depth:
                         best_value_for_this_depth = move_value
                         best_move_for_this_depth = move
-                    beta = min(beta, move_value)    # Uppdatera beta!
+                    beta = min(beta, move_value)
 
-            # Om loopen nådde hit har HELA djupet slutförts utan tidsavbrott.
-            # Först NU uppdaterar vi det officiella bästa draget!
             if best_move_for_this_depth is not None:
                 best_move_overall = best_move_for_this_depth
                 best_value = best_value_for_this_depth
 
     except TimeoutError:
-        # Om tiden tar slut mitt i ett djup kastas undantaget hit.
         print("Tiden tog slut – använder resultat från föregående färdiga djup.")
     
-    print("Cache size:", len(cache), "entries")
-    print("in MB:", len(cache) * 64 / (1024 * 1024))
+    # Använd local_cache för utskrifterna
+    print("Cache size:", len(local_cache), "entries")
+    print("in MB:", len(local_cache) * 64 / (1024 * 1024))
     print("Best move found:", best_move_overall, "with evaluation:", best_value)
+    
     return best_move_overall

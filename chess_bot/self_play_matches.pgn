@@ -1,0 +1,290 @@
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke3 Ke7 2. Kd2 Kf8 3. Rg2 Ke7 4. Rb7+ Kf8 5. Rc7 Ke8 6. Rg8# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke3 Ke7 2. Kd2 Kf8 3. Rg2 Ke7 4. Rb7+ Kf8 5. Rc7 Ke8 6. Rg8# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb8 Kf7 8. Ka8 Kf6 9. Kb8 Kf7 10. Ka8 Kf6 11. Kb8 Kf7 12. Ka8 Kf6 13. Kb8 Kf7 14. Ka8 Kf6 15. Kb8 Kf7 16. Ka8 Kf6 17. Kb8 Kf7 18. Ka8 Kf6 19. Kb8 Kf7 20. Ka8 Kf6 21. Kb8 Kf7 22. Ka8 Kf6 23. Kb8 Kf7 24. Ka8 Kf6 25. Kb8 Kf7 26. Ka8 Kf6 27. Kb8 Kf7 28. Ka8 Kf6 29. Kb8 Kf7 30. Ka8 Kf6 31. Kb8 Kf7 32. Ka8 Kf6 33. Kb8 Kf7 34. Ka8 Kf6 35. Kb8 Kf7 36. Ka8 Kf6 37. Kb8 Kf7 38. Ka8 Kf6 39. Kb8 Kf7 40. Ka8 Kf6 41. Kb8 Kf7 42. Ka8 Kf6 43. Kb8 Kf7 44. Ka8 Kf6 45. Kb8 Kf7 46. Ka8 Kf6 47. Kb8 Kf7 48. Ka8 Kf6 49. Kb8 Kf7 50. Ka8 Kf6 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Re1 Kg8 2. Rg2+ Kh8 3. Rh1# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb8 Kf7 8. Ka8 Kf6 9. Kb7 Kf7 10. Rg3 Kf6 11. Rg4 Kf5 12. Rb3 Kxg4 13. Rb2 Kf5 14. Kc6 Kf6 15. Kb7 Kg7 16. Kc6 Kg8 17. Kd5 Kh8 18. Kd4 Kg8 19. Rg2+ Kh8 20. Kc3 Kh7 21. Kb2 Kh8 22. Kb1 Kh7 23. Rf2 Kg8 24. Rg2+ Kh8 25. Rf2 Kg8 26. Rg2+ Kh8 27. Rf2 Kg8 28. Re2 Kh8 29. Rd2 Kg8 30. Rc2 Kh8 31. Rb2 Kg8 32. Rc2 Kh8 33. Rb2 Kg8 34. Rd2 Kh8 35. Rc2 Kg8 36. Rb2 Kh8 37. Rc2 Kg8 38. Rb2 Kh8 39. Ka2 Kg8 40. Ka3 Kh8 41. Ka2 Kg8 42. Rg2+ Kh8 43. Kb1 Kh7 44. Rf2 Kg8 45. Re2 Kh8 46. Rd2 Kg8 47. Rf2 Kh8 48. Re2 Kg8 49. Rd2 Kh8 50. Re2 Kg8 51. Rf2 Kh8 52. Ra2 Kg8 53. Rh2 Kg7 54. Rh3 Kg8 55. Rh2 Kg7 56. Rf2 Kg8 57. Ra2 Kh8 58. Kb2 Kg8 59. Kb1 Kh8 60. Rb2 Kg7 61. Rc2 Kh7 62. Rf2 Kg7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb8 Kf7 8. Ka8 Kf6 9. Kb7 Kf7 10. Rg3 Kf6 11. Rg4 Kf5 12. Rb3 Kxg4 13. Rb2 Kf5 14. Kc6 Kf6 15. Kd5 Kg7 16. Kc6 Kg8 17. Kd5 Kf8 18. Kc4 Kg8 19. Rg2+ Kh8 20. Kc3 Kh7 21. Kb2 Kh8 22. Kb1 Kh7 23. Rf2 Kg8 24. Rg2+ Kh8 25. Rf2 Kg8 26. Rg2+ Kh8 27. Rf2 Kg8 28. Re2 Kh8 29. Rd2 Kg8 30. Rc2 Kh8 31. Rb2 Kg8 32. Rc2 Kh8 33. Rb2 Kg8 34. Rd2 Kh8 35. Rc2 Kg8 36. Rb2 Kh8 37. Rc2 Kg8 38. Rb2 Kh8 39. Rd2 Kg8 40. Re2 Kh8 41. Rg2 Kh7 42. Rf2 Kg8 43. Rd2 Kh8 44. Re2 Kg8 45. Ka2 Kh8 46. Kb1 Kg8 47. Rf2 Kh8 48. Ra2 Kg8 49. Rf2 Kh8 50. Ra2 Kg8 51. Rh2 Kg7 52. Rf2 Kg8 53. Ra2 Kh8 54. Kb2 Kg8 55. Kb1 Kh8 56. Kb2 Kg8 57. Ka1 Kh8 58. Rb2 Kg8 59. Kb1 Kg7 60. Rc2 Kh7 61. Rf2 Kg7 62. Re2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb8 Kf7 8. Ka8 Kf6 9. Kb7 Kf7 10. Rb3 Kf6 11. Rgg3 Kf7 12. Rg4 Kf6 13. Ka8 Kf5 14. Kb8 Kxg4 15. Rb2 Kf5 16. Kc7 Kf6 17. Kb8 Kg7 18. Kc7 Kg8 19. Kc6 Kh8 20. Kd5 Kg8 21. Kc4 Kh8 22. Kc3 Kg8 23. Rg2+ Kh8 24. Kb2 Kh7 25. Kb1 Kh8 26. Rf2 Kg8 27. Rg2+ Kh8 28. Rf2 Kg8 29. Rg2+ Kh8 30. Re2 Kg8 31. Rd2 Kh8 32. Rc2 Kg8 33. Rb2 Kh8 34. Rc2 Kg8 35. Rb2 Kh8 36. Rd2 Kg8 37. Rc2 Kh8 38. Rb2 Kg8 39. Rc2 Kh8 40. Rb2 Kg8 41. Rd2 Kh8 42. Re2 Kg8 43. Rf2 Kh8 44. Rd2 Kg8 45. Re2 Kh8 46. Rg2 Kh7 47. Rf2 Kg8 48. Re2 Kh8 49. Rg2 Kh7 50. Rf2 Kg8 51. Ra2 Kh8 52. Kb2 Kg8 53. Kb1 Kh8 54. Kb2 Kg8 55. Ka1 Kh8 56. Kb1 Kg8 57. Rf2 Kh8 58. Ra2 Kg8 59. Rh2 Kg7 60. Rf2 Kh7 61. Re2 Kg7 62. Rd2 Kh7 63. Rf2 Kg7 64. Re2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb8 Kf7 8. Ka8 Kf6 9. Kb8 Kf7 10. Ka8 Kf6 11. Kb8 Kf7 12. Ka8 Kf6 13. Kb8 Kf7 14. Ka8 Kf6 15. Kb8 Kf7 16. Ka8 Kf6 17. Kb7 Kf7 18. Rb3 Kf6 19. Rgg3 Kf7 20. Rg4 Kf6 21. Ka8 Kf5 22. Kb8 Kxg4 23. Rb2 Kf5 24. Ka8 Kf6 25. Kb7 Kg7 26. Kc6 Kg8 27. Kd5 Kh8 28. Kd4 Kg8 29. Rg2+ Kh8 30. Kc3 Kh7 31. Kb2 Kh8 32. Kb1 Kh7 33. Rf2 Kg8 34. Rg2+ Kh8 35. Rf2 Kg8 36. Rg2+ Kh8 37. Rf2 Kg8 38. Re2 Kh8 39. Rd2 Kg8 40. Rc2 Kh8 41. Rb2 Kg8 42. Rc2 Kh8 43. Rb2 Kg8 44. Rd2 Kh8 45. Rc2 Kg8 46. Rb2 Kh8 47. Rc2 Kg8 48. Rb2 Kh8 49. Rd2 Kg8 50. Ka2 Kh8 51. Kb2 Kg8 52. Rg2+ Kh8 53. Kb1 Kh7 54. Rf2 Kg8 55. Re2 Kh8 56. Ra2 Kg8 57. Rd2 Kh8 58. Re2 Kg8 59. Rf2 Kh8 60. Re2 Kg8 61. Rf2 Kh8 62. Ra2 Kg8 63. Rh2 Kg7 64. Rf2 Kg8 65. Ra2 Kh8 66. Kb2 Kg8 67. Kb1 Kh8 68. Kb2 Kg8 69. Kb1 Kg7 70. Rb2 Kh7 71. Rf2 Kg7 72. Re2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Rg2+ Kh8 21. Rf2 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Re2 Kh8 25. Rd2 Kg8 26. Rc2 Kh8 27. Rb2 Kg8 28. Rc2 Kh8 29. Rb2 Kg8 30. Rd2 Kh8 31. Rc2 Kg8 32. Rb2 Kh8 33. Rc2 Kg8 34. Rb2 Kh8 35. Rd2 Kg8 36. Re2 Kh8 37. Rg2 Kh7 38. Rf2 Kg8 39. Rd2 Kh8 40. Re2 Kg8 41. Rf2 Kh8 42. Re2 Kg8 43. Rf2 Kh8 44. Ra2 Kg8 45. Rh2 Kg7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rh2 Kg7 54. Rf2 Kg8 55. Kb2 Kh8 56. Re2 Kg8 57. Kb1 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Re1 Kg8 2. Rg2+ Kh8 3. Rh1# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke5 Ke7 2. Re1 Kf8 3. Kf6 Kg8 4. Re8+ Kh7 5. Rh2# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Rb7 Ke8 4. Rg8# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Rg2+ Kh8 21. Rf2 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Re2 Kh8 25. Rd2 Kg8 26. Rc2 Kh8 27. Rb2 Kg8 28. Rc2 Kh8 29. Rb2 Kg8 30. Rd2 Kh8 31. Rc2 Kg8 32. Rb2 Kh8 33. Rc2 Kg8 34. Rb2 Kh8 35. Rd2 Kg8 36. Re2 Kh8 37. Rg2 Kh7 38. Rf2 Kg8 39. Rd2 Kh8 40. Re2 Kg8 41. Rf2 Kh8 42. Re2 Kg8 43. Rf2 Kh8 44. Ra2 Kg8 45. Rh2 Kg7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rh2 Kg7 54. Rf2 Kg8 55. Kb2 Kh8 56. Re2 Kg8 57. Kb1 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Rg2+ Kh8 21. Rf2 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Re2 Kh8 25. Rd2 Kg8 26. Rc2 Kh8 27. Rb2 Kg8 28. Rc2 Kh8 29. Rb2 Kg8 30. Rd2 Kh8 31. Rc2 Kg8 32. Rc3 Kh8 33. Rc2 Kg8 34. Rb2 Kh8 35. Rd2 Kg8 36. Rb2 Kh8 37. Re2 Kg8 38. Rd2 Kh8 39. Re2 Kg8 40. Rf2 Kh8 41. Rg2 Kh7 42. Rf2 Kg8 43. Re2 Kh8 44. Ra2 Kg8 45. Rf2 Kh8 46. Ra2 Kg8 47. Rh2 Kg7 48. Rf2 Kg8 49. Ra2 Kh8 50. Kb2 Kg8 51. Kb1 Kh8 52. Kb2 Kg8 53. Ka1 Kh8 54. Rg2 Kh7 55. Kb1 Kh8 56. Kb2 Kh7 57. Kb1 Kh6 58. Rf2 Kg7 59. Re2 Kh7 60. Rf2 Kg7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Rb7 Ke8 4. Rb8+ Kd7 5. Rb7+ Kc8 6. Kd6 Kxb7 7. Kc5 Kb8 8. Rb2+ Ka8 9. Kc6 Ka7 10. Kc5 Ka8 11. Kc6 Ka7 12. Kc5 Ka8 13. Kb6 Kb8 14. Kc6+ Ka7 15. Rc2 Kb8 16. Rb2+ Ka7 17. Rc2 Kb8 18. Rd2 Ka8 19. Rc2 Kb8 20. Rd2 Ka8 21. Rc2 Kb8 22. Re2 Ka8 23. Rd2 Kb8 24. Rc2 Ka8 25. Rd2 Kb8 26. Rc2 Ka8 27. Re2 Kb8 28. Rf2 Ka8 29. Re2 Kb8 30. Rf2 Ka8 31. Rg2 Kb8 32. Re2 Ka8 33. Rf2 Kb8 34. Rg2 Ka8 35. Rf2 Kb8 36. Rg2 Ka8 37. Kc7 Ka7 38. Ra2# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Rb7 Ke8 4. Rb8+ Kd7 5. Rb7+ Kc8 6. Kd6 Kxb7 7. Kc5 Kb8 8. Rb2+ Ka8 9. Kc6 Ka7 10. Kc5 Ka8 11. Kc6 Ka7 12. Kc5 Ka8 13. Kb6 Kb8 14. Kc6+ Ka7 15. Rc2 Kb8 16. Rb2+ Ka7 17. Rc2 Kb8 18. Rd2 Ka8 19. Rc2 Kb8 20. Rd2 Ka8 21. Rc2 Kb8 22. Re2 Ka8 23. Rd2 Kb8 24. Rc2 Ka8 25. Rd2 Kb8 26. Rc2 Ka8 27. Re2 Kb8 28. Rf2 Ka8 29. Re2 Kb8 30. Rf2 Ka8 31. Rg2 Kb8 32. Re2 Ka8 33. Rf2 Kb8 34. Rg2 Ka8 35. Rf2 Kb8 36. Rg2 Ka8 37. Kc7 Ka7 38. Ra2# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Rb7 Ke8 4. Rb8+ Kd7 5. Rb7+ Kc8 6. Kd6 Kxb7 7. Kc5 Kb8 8. Rb2+ Ka8 9. Kc6 Ka7 10. Kc5 Ka8 11. Kc6 Ka7 12. Kc5 Ka8 13. Kb6 Kb8 14. Kc6+ Ka7 15. Rc2 Kb8 16. Rb2+ Ka7 17. Rc2 Kb8 18. Rd2 Ka8 19. Rc2 Kb8 20. Rd2 Ka8 21. Rc2 Kb8 22. Re2 Ka8 23. Rd2 Kb8 24. Rc2 Ka8 25. Rd2 Kb8 26. Rc2 Ka8 27. Re2 Kb8 28. Rf2 Ka8 29. Re2 Kb8 30. Rf2 Ka8 31. Rg2 Kb8 32. Re2 Ka8 33. Rf2 Kb8 34. Rg2 Ka8 35. Rf2 Kb8 36. Rg2 Ka8 37. Kc7 Ka7 38. Ra2# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Rg2+ Kh8 21. Rf2 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Re2 Kh8 25. Rd2 Kg8 26. Rc2 Kh8 27. Rb2 Kg8 28. Rc2 Kh8 29. Rb2 Kg8 30. Rd2 Kh8 31. Rc2 Kg8 32. Rb2 Kh8 33. Rc2 Kg8 34. Rb2 Kh8 35. Rd2 Kg8 36. Re2 Kh8 37. Rg2 Kh7 38. Rf2 Kg8 39. Rd2 Kh8 40. Re2 Kg8 41. Rf2 Kh8 42. Re2 Kg8 43. Rf2 Kh8 44. Ra2 Kg8 45. Rh2 Kg7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rh2 Kg7 54. Rf2 Kg8 55. Kb2 Kh8 56. Re2 Kg8 57. Kb1 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Ke8 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb8 Kf7 8. Ka8 Kf6 9. Kb8 Kf7 10. Ka8 Kf6 11. Kb8 Kf7 12. Ka8 Kf6 13. Kb8 Kf7 14. Ka8 Kf6 15. Kb8 Kf7 16. Ka8 Kf6 17. Kb8 Kf7 18. Ka8 Kf6 19. Kb8 Kf7 20. Ka8 Kf6 21. Kb8 Kf7 22. Ka8 Kf6 23. Kb8 Kf7 24. Ka8 Kf6 25. Kb8 Kf7 26. Ka8 Kf6 27. Kb7 Kf7 28. Rg3 Kf6 29. Rg4 Kf5 30. Rb3 Kxg4 31. Rb2 Kf5 32. Kc6 Kf6 33. Kd5 Kg7 34. Kd4 Kg8 35. Rg2+ Kh8 36. Kc3 Kh7 37. Kb2 Kh8 38. Kb1 Kh7 39. Rf2 Kg8 40. Rg2+ Kh8 41. Rf2 Kg8 42. Ka2 Kh8 43. Kb1 Kg8 44. Rg2+ Kh8 45. Re2 Kg8 46. Rd2 Kh8 47. Rc2 Kg8 48. Rb2 Kh8 49. Rc2 Kg8 50. Rb2 Kh8 51. Rd2 Kg8 52. Rc2 Kh8 53. Rb2 Kg8 54. Rc2 Kh8 55. Rb2 Kg8 56. Rd2 Kh8 57. Re2 Kg8 58. Rf2 Kh8 59. Rd2 Kg8 60. Re2 Kh8 61. Rg2 Kh7 62. Rf2 Kg8 63. Re2 Kh8 64. Ra2 Kg8 65. Rf2 Kh8 66. Ra2 Kg8 67. Rh2 Kg7 68. Rf2 Kg8 69. Ra2 Kh8 70. Kb2 Kg8 71. Kb1 Kh8 72. Kb2 Kg8 73. Ka1 Kh8 74. Rb2 Kg8 75. Rc2 Kh8 76. Kb2 Kg8 77. Kb1 Kg7 78. Rb2 Kh7 79. Rf2 Kg7 80. Re2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Rb7 Ke8 4. Rg8# 1-0
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Rg2+ Kh8 21. Rf2 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Re2 Kh8 25. Rd2 Kg8 26. Rc2 Kh8 27. Rb2 Kg8 28. Rc2 Kh8 29. Rb2 Kg8 30. Rd2 Kh8 31. Rc2 Kg8 32. Rb2 Kh8 33. Rc2 Kg8 34. Rb2 Kh8 35. Rd2 Kg8 36. Re2 Kh8 37. Rg2 Kh7 38. Rf2 Kg8 39. Rd2 Kh8 40. Re2 Kg8 41. Rf2 Kh8 42. Re2 Kg8 43. Rf2 Kh8 44. Ra2 Kg8 45. Rh2 Kg7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rh2 Kg7 54. Rf2 Kg8 55. Kb2 Kh8 56. Re2 Kg8 57. Kb1 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Rg2+ Kh8 21. Rf2 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Re2 Kh8 25. Rd2 Kg8 26. Rc2 Kh8 27. Rb2 Kg8 28. Rc2 Kh8 29. Rb2 Kg8 30. Rd2 Kh8 31. Rc2 Kg8 32. Rb2 Kh8 33. Rc2 Kg8 34. Rb2 Kh8 35. Rd2 Kg8 36. Re2 Kh8 37. Rg2 Kh7 38. Rf2 Kg8 39. Rd2 Kh8 40. Re2 Kg8 41. Rf2 Kh8 42. Re2 Kg8 43. Rf2 Kh8 44. Ra2 Kg8 45. Rh2 Kg7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rh2 Kg7 54. Rf2 Kg8 55. Kb2 Kh8 56. Re2 Kg8 57. Kb1 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Rg2+ Kh8 21. Rf2 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Re2 Kh8 25. Rd2 Kg8 26. Rc2 Kh8 27. Rb2 Kg8 28. Rc2 Kh8 29. Rb2 Kg8 30. Rd2 Kh8 31. Rc2 Kg8 32. Rb2 Kh8 33. Rc2 Kg8 34. Rb2 Kh8 35. Rd2 Kg8 36. Re2 Kh8 37. Rg2 Kh7 38. Rf2 Kg8 39. Rd2 Kh8 40. Re2 Kg8 41. Rf2 Kh8 42. Re2 Kg8 43. Rf2 Kh8 44. Ra2 Kg8 45. Rh2 Kg7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rh2 Kg7 54. Rf2 Kg8 55. Kb2 Kh8 56. Re2 Kg8 57. Kb1 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rb3 Kf6 9. Rgg3 Kf7 10. Rg4 Kf6 11. Ka8 Kf5 12. Kb8 Kxg4 13. Rb2 Kf5 14. Kc7 Kf6 15. Kc6 Kg7 16. Kd5 Kg8 17. Kc4 Kh8 18. Kc3 Kg8 19. Rg2+ Kh8 20. Kb2 Kh7 21. Kb1 Kh8 22. Rf2 Kg8 23. Rg2+ Kh8 24. Rf2 Kg8 25. Rg2+ Kh8 26. Re2 Kg8 27. Rd2 Kh8 28. Rc2 Kg8 29. Rb2 Kh8 30. Rc2 Kg8 31. Rb2 Kh8 32. Rd2 Kg8 33. Rc2 Kh8 34. Rb2 Kg8 35. Rc2 Kh8 36. Rb2 Kg8 37. Rd2 Kh8 38. Re2 Kg8 39. Rf2 Kh8 40. Rd2 Kg8 41. Re2 Kh8 42. Rg2 Kh7 43. Rf2 Kg8 44. Re2 Kh8 45. Rg2 Kh7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rf2 Kh8 54. Ra2 Kg8 55. Rh2 Kg7 56. Rf2 Kg8 57. Rh2 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 61. Re2 Kg7 62. Rf2 Kh6 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rg3 Kf6 9. Rg4 Kf5 10. Rb3 Kxg4 11. Rb2 Kf5 12. Kc6 Kf6 13. Kd5 Kg7 14. Kd4 Kg8 15. Rg2+ Kh8 16. Kc3 Kh7 17. Kb2 Kh8 18. Kb1 Kh7 19. Rf2 Kg8 20. Ka2 Kh8 21. Kb1 Kg8 22. Rg2+ Kh8 23. Rf2 Kg8 24. Rg2+ Kh8 25. Re2 Kg8 26. Rd2 Kh8 27. Rc2 Kg8 28. Rb2 Kh8 29. Rc2 Kg8 30. Rb2 Kh8 31. Rd2 Kg8 32. Rc2 Kh8 33. Rb2 Kg8 34. Rc2 Kh8 35. Rb2 Kg8 36. Rd2 Kh8 37. Re2 Kg8 38. Rf2 Kh8 39. Rd2 Kg8 40. Re2 Kh8 41. Rg2 Kh7 42. Rf2 Kg8 43. Re2 Kh8 44. Ra2 Kg8 45. Rf2 Kh8 46. Ra2 Kg8 47. Rh2 Kg7 48. Rf2 Kg8 49. Ra2 Kh8 50. Kb2 Kg8 51. Kb1 Kh8 52. Kb2 Kg8 53. Ka1 Kh8 54. Rb2 Kg8 55. Rc2 Kh8 56. Kb2 Kg8 57. Kb1 Kg7 58. Rb2 Kh7 59. Rf2 Kg7 60. Re2 Kh7 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Kd6 Kf7 4. Kc7 Kf6 5. Kb8 Kf7 6. Ka8 Kf6 7. Kb7 Kf7 8. Rb3 Kf6 9. Rgg3 Kf7 10. Rg4 Kf6 11. Ka8 Kf5 12. Kb8 Kxg4 13. Rb2 Kf5 14. Kc7 Kf6 15. Kc6 Kg7 16. Kd5 Kg8 17. Kc4 Kh8 18. Kc3 Kg8 19. Rg2+ Kh8 20. Kb2 Kh7 21. Kb1 Kh8 22. Rf2 Kg8 23. Rg2+ Kh8 24. Rf2 Kg8 25. Rg2+ Kh8 26. Re2 Kg8 27. Rd2 Kh8 28. Rc2 Kg8 29. Rb2 Kh8 30. Rc2 Kg8 31. Rb2 Kh8 32. Rd2 Kg8 33. Rc2 Kh8 34. Rb2 Kg8 35. Rc2 Kh8 36. Rb2 Kg8 37. Rd2 Kh8 38. Re2 Kg8 39. Rf2 Kh8 40. Rd2 Kg8 41. Re2 Kh8 42. Rg2 Kh7 43. Rf2 Kg8 44. Re2 Kh8 45. Rg2 Kh7 46. Rf2 Kg8 47. Ra2 Kh8 48. Kb2 Kg8 49. Kb1 Kh8 50. Kb2 Kg8 51. Ka1 Kh8 52. Kb1 Kg8 53. Rf2 Kh8 54. Ra2 Kg8 55. Rh2 Kg7 56. Rf2 Kg8 57. Rh2 Kg7 58. Rf2 Kh7 59. Re2 Kg7 60. Rf2 Kh7 61. Re2 Kg7 62. Rf2 Kh6 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Rb7 Ke8 4. Kd6 Kf8 5. Kc7 Kf7 6. Kb8+ Kf6 7. Ka8 Ke5 8. Rb8 Kf6 9. Kb7 Kf7 10. Ra8 Kf6 11. Ra7 Kf7 12. Ra8 Kf6 13. Ra7 Kf7 14. Ra8 Kf6 15. Ra7 Kf7 16. Ra8 Kf6 17. Ra7 Kf7 18. Ra8 Kf6 19. Ra7 Kf7 20. Ra8 Kf6 21. Ra7 Kf7 22. Ra8 Kf6 23. Ra7 Kf7 24. Ra8 Kf6 25. Ra7 Kf7 26. Ra8 Kf6 27. Ra7 Kf7 28. Ra8 Kf6 29. Ra7 Kf7 30. Ra8 Kf6 31. Ra7 Kf7 32. Ra8 Kf6 33. Ra7 Kf7 34. Ra8 Kf6 35. Ra7 Kf7 36. Ra8 Kf6 37. Ra7 Kf7 38. Ra8 Kf6 39. Ra7 Kf7 40. Ra8 Kf6 41. Ra7 Kf7 42. Ra8 Kf6 43. Ra7 Kf7 44. Kc7 Kf6 45. Kb8 Ke5 46. Ka8 Kf6 47. Kb8 Ke5 48. Ka8 Kf6 49. Rb7 Ke5 50. Kb8 Kf6 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1/2-1/2"]
+
+1. Ke5 Ke7 2. Rgg2 Kf8 3. Rb7 Ke8 4. Kd6 Kf8 5. Kc7 Kf7 6. Kb8+ Kf6 7. Ka8 Ke5 8. Rb8 Kd6 9. Rb7 Ke5 10. Kb8 Kf6 11. Ka8 Ke5 12. Kb8 Kd6 13. Ka8 Ke5 14. Kb8 Kf6 15. Ka8 Ke5 16. Kb8 Kf6 17. Ka8 Ke5 18. Kb8 Kf6 19. Ka8 Ke5 20. Kb8 Kf6 21. Ka8 Ke5 22. Kb8 Kf6 23. Ka8 Ke5 24. Kb8 Kf6 25. Kc7 Kf7 26. Kb8+ Kf6 27. Ka8 Ke5 28. Kb8 Kf6 29. Ka8 Ke5 30. Kb8 Kf6 31. Ka8 Ke5 32. Kb8 Kf6 33. Ka8 Ke5 34. Kb8 Kf6 35. Ka8 Ke5 36. Kb8 Kf6 37. Ka8 Ke5 38. Kb8 Kf6 39. Ka8 Ke5 40. Kb8 Kf6 41. Ka8 Ke5 42. Kb8 Kf6 43. Ka8 Ke5 44. Kb8 Kf6 45. Ka8 Ke5 46. Rb8 Kf6 47. Rb7 Ke5 48. Kb8 Kf6 49. Ka8 Ke5 50. Rb8 Kf6 1/2-1/2
+
+[Event "Bot Self-Play Match"]
+[Site "Local"]
+[Date "2026.07.30"]
+[Round "1"]
+[White "Bot A"]
+[Black "Bot B"]
+[Result "1-0"]
+
+1. Re1 Kg8 2. Rg2+ Kh8 3. Rh1# 1-0
+

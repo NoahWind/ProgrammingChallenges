@@ -1,5 +1,5 @@
 import time
-from chess_rules import get_all_legal_moves, get_location_of_all_pieces, is_check, apply_move, undo_move, is_stalemate, get_position_hash
+from chess_rules import get_all_legal_moves, get_location_of_all_pieces, is_check, apply_move, undo_move, is_stalemate, get_position_hash, find_king, square_attacked
 # ==========================================
 # ÄNDRAT jämfört med föregående version:
 #
@@ -42,25 +42,23 @@ from chess_rules import get_all_legal_moves, get_location_of_all_pieces, is_chec
 from different_evals import *
 
 ENGINE_PARAMS ={
-    "BREAKING_PAWN_CHAINS_BONUS": 0.0021,
-    "CONTROL_CENTER_BONUS": 14.7545,
-    "END_RATE": 0.0328,
-    "KING_SAFETY_BONUS": 0.0004,
-    "OPEN_RATE": 0.0199,
-    "PASSED_PAWN_BONUS": 0.1252,
-    "bishop_pair_bonus": 0.5911,
-    "enemy_king_center_bonus": 0.1252,
-    "enemy_king_corner_bonus": 0.2503,
-    "hanging_piece_penalty": -557,
-    "isolated_pawn_penalty": 0.1156,
-    "knight_on_the_rim_penalty": 0.3939,
-    "pawn_chain_bonus": 1.1622,
-    "pieac_pos_bonus": 24.8262,
-    "rook_open_file_bonus": 0.0,
-    "squares_controlled_bonus": 0.0,
-    "rook_on_seventh_rank_bonus": 0.0,
-
-
+        "OPEN_RATE": 0.3,                  # Hur länge öppningsfasen hänger med
+        "END_RATE": 0.3,                   # När slutspelet börjar kicka in
+        "BREAKING_PAWN_CHAINS_BONUS": 0.05,
+        "CONTROL_CENTER_BONUS": 0.2,       # Belöning för att kontrollera d4/d5/e4/e5
+        "KING_SAFETY_BONUS": 0.25,         # Håller kungen trygg bakom bönderna i början
+        "PASSED_PAWN_BONUS": 0.4,          # Fribönder blir extremt värdefulla i slutet
+        "bishop_pair_bonus": 0.3,          # Bonus för att ha båda löparna kvar
+        "enemy_king_center_bonus": 0.2,    # Hjälper till att driva kungen i slutspelet
+        "enemy_king_corner_bonus": 0.35,   # Belönar att tränga kungen mot kanten för matt
+        "hanging_piece_penalty": 1.0,      # Straffar hängande pjäser hårt
+        "isolated_pawn_penalty": 0.15,    # Straff för svaga, isolerade bönder
+        "knight_on_the_rim_penalty": 0.15, # Straffar springare på kanten ("knight on the rim is dim")
+        "pawn_chain_bonus": 0.1,           # Belönar starka bondekedjor
+        "pieac_pos_bonus": 1.0,            # Aktiverar dina Piece-Square Tables (PST) ordentligt!
+        "rook_on_seventh_rank_bonus": 0.3, # Stark bonus för torn på sjunde raden
+        "rook_open_file_bonus": 0.2,       # Belönar torn på öppna linjer
+        "squares_controlled_bonus": 0.01,  # Rymdkontroll / mobilitet
     }
 def _has_any_pawns(board):
     return any(piece in ('♙', '♟') for row in board for piece in row)
@@ -156,22 +154,15 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
             and not _has_any_pawns(board)):
         return 0 
 
-    if is_stalemate(board, current_color, state):
-        return 0
-    if cant_even_mate(board, state):
-        return 0
-        
-    moves = get_all_legal_moves(current_color, board, state)
-    enemy_color = 'black' if current_color == 'white' else 'white'
-    enemy_moves = get_all_legal_moves(enemy_color, board, state)
-    
-    # Hämta våra 3 vikter!
+    # BORTTAGET: is_stalemate och cant_even_mate. De kräver för mycket beräkningskraft 
+    # på lövnivå och patt hanteras redan korrekt uppe i minimax-funktionen.
+
+    # Hämta våra 3 vikter
     a, b, c = get_game_phase_weights(
         state, 
         ENGINE_PARAMS.get("OPEN_RATE", 0.6), 
         ENGINE_PARAMS.get("END_RATE", 0.6)
     )
-
     if state.half_move_clock > 80:
         if score < 0:
             score += (state.half_move_clock - 80) * 0.5 
@@ -179,8 +170,7 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
             score -= (state.half_move_clock - 80) * 0.5
     
     # ---------------------------------------------------------
-    # GRUPP 1: Öppning & Mittspel (Tonar ut i slutspelet)
-    # Vi multiplicerar med (a + b)
+    # GRUPP 1: Öppning & Mittspel
     # ---------------------------------------------------------
     if is_king_safe(board, 'white', state): score += ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
     if is_king_safe(board, 'black', state): score -= ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
@@ -188,17 +178,14 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     if is_controling_center(board, 'white'): score += ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * (a + b)
     if is_controling_center(board, 'black'): score -= ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * (a + b)
 
-    black_sqr = how_many_squares_do_i_control(board, 'black', state, enemy_moves)
-    white_sqr = how_many_squares_do_i_control(board, 'white', state, moves)
-    if black_sqr > 0: score -= ENGINE_PARAMS["squares_controlled_bonus"] * (black_sqr - white_sqr) * (a + b)
-    if white_sqr > 0: score += ENGINE_PARAMS["squares_controlled_bonus"] * (white_sqr - black_sqr) * (a + b)
+    # BORTTAGET: Mobility / squares_controlled_bonus. 
+    # Att generera alla lagliga drag i löven är det som förstörde motorns hastighet.
 
     if knight_on_the_rim(board, 'white', state): score -= ENGINE_PARAMS["knight_on_the_rim_penalty"] * (a + b)
     if knight_on_the_rim(board, 'black', state): score += ENGINE_PARAMS["knight_on_the_rim_penalty"] * (a + b)
 
     # ---------------------------------------------------------
-    # GRUPP 2: Rent Slutspel (Noll i början, starkt i slutet)
-    # Vi multiplicerar med c
+    # GRUPP 2: Rent Slutspel
     # ---------------------------------------------------------
     corner_w = endgame_push_king_enemy_to_corner(board, 'white', state)
     corner_b = endgame_push_king_enemy_to_corner(board, 'black', state)
@@ -215,14 +202,13 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     score += king_confinement_and_distance_bonus(state) * c
 
     # ---------------------------------------------------------
-    # GRUPP 3: Extra viktigt i slutspelet (Bra alltid, men bäst i slutet)
-    # Vi multiplicerar med (1.0 + c) för att ge en extra boost
+    # GRUPP 3: Extra viktigt i slutspelet
     # ---------------------------------------------------------
-    if passed_pawn_score(board, 'white', state): score += ENGINE_PARAMS["PASSED_PAWN_BONUS"] * (1.0 + c)
-    if passed_pawn_score(board, 'black', state): score -= ENGINE_PARAMS["PASSED_PAWN_BONUS"] * (1.0 + c)
+    score += passed_pawn_score(board, 'white', state) * ENGINE_PARAMS["PASSED_PAWN_BONUS"] * (1.0 + c)
+    score += passed_pawn_score(board, 'black', state) * ENGINE_PARAMS["PASSED_PAWN_BONUS"] * (1.0 + c)
 
-    if isolated_pawn_penalty_or_doubling(board, 'white', state): score -= ENGINE_PARAMS["isolated_pawn_penalty"] * (1.0 + c)
-    if isolated_pawn_penalty_or_doubling(board, 'black', state): score += ENGINE_PARAMS["isolated_pawn_penalty"] * (1.0 + c)
+    score -= abs(isolated_pawn_penalty_or_doubling(board, 'white', state)) * ENGINE_PARAMS["isolated_pawn_penalty"] * (1.0 + c)
+    score += abs(isolated_pawn_penalty_or_doubling(board, 'black', state)) * ENGINE_PARAMS["isolated_pawn_penalty"] * (1.0 + c)
 
     if rook_on_the_seventh_rank(board, 'white', state): score += ENGINE_PARAMS["rook_on_seventh_rank_bonus"] * (1.0 + c)
     if rook_on_the_seventh_rank(board, 'black', state): score -= ENGINE_PARAMS["rook_on_seventh_rank_bonus"] * (1.0 + c)
@@ -231,14 +217,13 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     if bishop_pair(board, 'black', state): score -= ENGINE_PARAMS["bishop_pair_bonus"] * (1.0 + c)
 
     # ---------------------------------------------------------
-    # GRUPP 4: Konstanta regler (Lika bra genom hela spelet)
-    # Vi behöver inte multiplicera dem (dvs de gångas med 1.0)
+    # GRUPP 4: Konstanta regler
     # ---------------------------------------------------------
     if breakt_pawn_chains(board, 'white', state): score -= ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"]
     if breakt_pawn_chains(board, 'black', state): score += ENGINE_PARAMS["BREAKING_PAWN_CHAINS_BONUS"]
 
-    if Rook_Open_Files(board, 'white', state): score += ENGINE_PARAMS["rook_open_file_bonus"]
-    if Rook_Open_Files(board, 'black', state): score -= ENGINE_PARAMS["rook_open_file_bonus"]
+    score += abs(Rook_Open_Files(board, 'white', state)) * ENGINE_PARAMS["rook_open_file_bonus"]
+    score -= abs(Rook_Open_Files(board, 'black', state)) * ENGINE_PARAMS["rook_open_file_bonus"]
     
     if pawn_chain(board, 'white', state): score += ENGINE_PARAMS["pawn_chain_bonus"]
     if pawn_chain(board, 'black', state): score -= ENGINE_PARAMS["pawn_chain_bonus"]
@@ -255,10 +240,50 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
 # 3. SÖKMOTORN
 # ==========================================
 
+def quick_discard_move(board, move):
+    """
+    Snabb kontroll för att identifiera uppenbart dåliga drag (ex. ställa en dam
+    rakt i slag av en fiendebonde utan att ta något värdefullt).
+    Returnerar True om draget bör prioriteras bort i dragordningen.
+    """
+    (sr, sc), (er, ec) = move
+    piece = board[sr][sc]
+    target = board[er][ec]
+    
+    # Bönder och kungar bortser vi från i denna snabbkoll
+    if piece in ('♙', '♟', '♔', '♚'):
+        return False
+        
+    color = 'white' if piece in WHITE_PIECES else 'black'
+    enemy_color = 'black' if color == 'white' else 'white'
+    
+    # Om vi slår en pjäs som är minst lika mycket värd, kasta inte draget
+    if target != ' ':
+        attacker_val = abs(PIECE_VALUES.get(piece, 0))
+        target_val = abs(PIECE_VALUES.get(target, 0))
+        if target_val >= attacker_val:
+            return False
+    
+    # Kolla blixtsnabbt om målrutan övervakas av en fientlig bonde
+    pawn_dr_attack = 1 if enemy_color == 'white' else -1
+    enemy_pawn = '♙' if enemy_color == 'white' else '♟'
+    
+    pr = er + pawn_dr_attack
+    if 0 <= pr < 8:
+        if ec - 1 >= 0 and board[pr][ec - 1] == enemy_pawn: return True
+        if ec + 1 < 8 and board[pr][ec + 1] == enemy_pawn: return True
+                
+    return False
+
+
 def order_moves(moves, board, best_move=None):
     def move_score(move):
         if move == best_move:
             return 1000000
+
+        # Kasta ner dåliga drag längst ner i sorteringen
+        if quick_discard_move(board, move):
+            return -999999
 
         (sr, sc), (er, ec) = move
         captured = board[er][ec]
@@ -273,6 +298,7 @@ def order_moves(moves, board, best_move=None):
 
     moves.sort(key=move_score, reverse=True)
     return moves
+
 def _is_capture_move(board, state, move):
     """True om draget slår en pjäs eller förvandlar en bonde."""
     (sr, sc), (er, ec) = move
@@ -400,16 +426,13 @@ def _attackers_to_square(board, r, c, by_color):
 
 def static_exchange_eval(board, move):
     """Simulerar en fullständig utbytesföljd på målrutan UTAN att röra det
-    riktiga brädet/state (allt sker på en kopia), och returnerar nettovinsten
-    i pjäspoäng (positivt = lönsamt slag för den som drar).
-
-    Standardalgoritm: båda sidor tar tillbaka med sin billigaste tillgängliga
-    pjäs tills ingen vill/kan fortsätta (negamax över utbytesserien)."""
+    riktiga brädet/state, och returnerar nettovinsten i pjäspoäng.
+    Tar nu hänsyn till bindningar och att kungar inte får gå in i schack."""
     (sr, sc), (er, ec) = move
     attacker_piece = board[sr][sc]
     target_piece = board[er][ec]
     if target_piece == ' ':
-        return 0  # tyst drag (en passant hanteras separat i _is_capture_move)
+        return 0
 
     attacker_color = 'white' if attacker_piece in '♙♘♗♖♕♔' else 'black'
     defender_color = 'black' if attacker_color == 'white' else 'white'
@@ -424,19 +447,33 @@ def static_exchange_eval(board, move):
 
     while True:
         attackers = _attackers_to_square(board_copy, er, ec, side)
-        if not attackers:
+        legal_attacker_found = False
+        target_occupant = board_copy[er][ec]
+        
+        for (fr, fc), val in attackers:
+            test_piece = board_copy[fr][fc]
+            
+            # Simulera slag
+            board_copy[er][ec] = test_piece
+            board_copy[fr][fc] = ' '
+            
+            # Validera mot bindningar / schack
+            kr, kc = find_king(board_copy, side)
+            if not square_attacked(board_copy, kr, kc, side):
+                # Slaget är lagligt!
+                legal_attacker_found = True
+                gain.append(current_attacker_value - gain[-1])
+                current_attacker_value = val
+                side = 'black' if side == 'white' else 'white'
+                break  # Avbryt sökandet efter pjäser för denna tur
+            else:
+                # Draget är ogiltigt (pin/schack), återställ och testa nästa angripare i listan
+                board_copy[fr][fc] = test_piece
+                board_copy[er][ec] = target_occupant
+                
+        if not legal_attacker_found:
             break
-        (fr, fc), val = attackers[0]
-        gain.append(current_attacker_value - gain[-1])
-        board_copy[er][ec] = board_copy[fr][fc]
-        board_copy[fr][fc] = ' '
-        current_attacker_value = val
-        side = 'black' if side == 'white' else 'white'
 
-    # Vik ihop utbytesserien bakifrån (negamax): varje sida väljer att
-    # AVBRYTA utbytet (dvs. inte återta) om det skulle bli en förlustaffär,
-    # så varje steg tar det bästa av "fortsätt utbytet" vs "sluta här".
     for i in range(len(gain) - 2, -1, -1):
         gain[i] = min(gain[i], -gain[i + 1])
     return gain[0]
-
