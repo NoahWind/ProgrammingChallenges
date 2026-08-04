@@ -87,46 +87,6 @@ QUEEN_PST = [
     [-20,-10,-10, -5, -5,-10,-10,-20]
 ]
 
-def evaluate_pieces_and_threats(board, state, color):
-    pst_score = 0.0
-    hanging_score = 0.0
-    
-    own_pieces = state.white_pieces if color == 'white' else state.black_pieces
-    enemy_color = 'black' if color == 'white' else 'white'
-    king_piece = '♔' if color == 'white' else '♚'
-    
-    for r, c in own_pieces:
-        piece = board[r][c]
-        if piece == ' ':
-            continue
-        
-        # PST-beräkning (nu med kungen inkluderad!)
-        if color == 'white':
-            if piece == '♙': pst_score += PAWN_PST[r][c] * 0.01
-            elif piece == '♘': pst_score += KNIGHT_PST[r][c] * 0.01
-            elif piece == '♗': pst_score += BISHOP_PST[r][c] * 0.01
-            elif piece == '♖': pst_score += ROOK_PST[r][c] * 0.01
-            elif piece == '♕': pst_score += QUEEN_PST[r][c] * 0.01
-            elif piece == '♔': pst_score += KING_MG_PST[r][c] * 0.01
-        else:
-            sr = 7 - r
-            if piece == '♟': pst_score += PAWN_PST[sr][c] * 0.01
-            elif piece == '♞': pst_score += KNIGHT_PST[sr][c] * 0.01
-            elif piece == '♝': pst_score += BISHOP_PST[sr][c] * 0.01
-            elif piece == '♜': pst_score += ROOK_PST[sr][c] * 0.01
-            elif piece == '♛': pst_score += QUEEN_PST[sr][c] * 0.01
-            elif piece == '♚': pst_score += KING_MG_PST[sr][c] * 0.01
-
-        # Hängande pjäser-kontroll (oförändrad)
-        # Hängande pjäser-kontroll
-        if piece != king_piece:
-            if _is_square_attacked_fast(board, r, c, enemy_color):
-                if not _is_square_attacked_fast(board, r, c, color):
-                    val = abs(PIECE_VALUES.get(piece, 0))
-                    # Tog bort * 0.15 här så att ENGINE_PARAMS får bestämma vikten
-                    hanging_score -= val
-    mult = 1.0 if color == 'white' else -1.0
-    return pst_score * mult, hanging_score * mult
 
 BLACK_PIECES = {'♟', '♞', '♝', '♜', '♛', '♚'}
 WHITE_PIECES = {'♙', '♘', '♗', '♕', '♖', '♔'}
@@ -208,39 +168,88 @@ def is_controling_center(board, color):
             return True
     return False
 
+def build_attack_map(board, by_color, state):
+    """Bygger en set av alla rutor som attackerats av by_color. O(pjäser) istället för O(rutor)."""
+    attacked = set()
+    own_pieces = state.white_pieces if by_color == 'white' else state.black_pieces
+    
+    pawn_dr = -1 if by_color == 'white' else 1
+    pawn_piece = '♙' if by_color == 'white' else '♟'
+    knight_piece = '♘' if by_color == 'white' else '♞'
+    king_piece = '♔' if by_color == 'white' else '♚'
+    rook_like = {'♖', '♕'} if by_color == 'white' else {'♜', '♛'}
+    bishop_like = {'♗', '♕'} if by_color == 'white' else {'♝', '♛'}
 
-def is_king_safe(board, color, state):
-    """
-    Bättre kungsäkerhet: Kollar inte bara om kungen står i schack,
-    utan också om den har sin bondeförsvarslinje intakt och
-    hur många rutor runt kungen som är attackerade av motståndaren.
-    """
+    for r, c in own_pieces:
+        piece = board[r][c]
+        
+        # Bönder
+        if piece == pawn_piece:
+            pr = r + pawn_dr
+            if 0 <= pr < 8:
+                if c - 1 >= 0: attacked.add((pr, c - 1))
+                if c + 1 < 8: attacked.add((pr, c + 1))
+                
+        # Springare
+        elif piece == knight_piece:
+            for dr, dc in ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)):
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < 8 and 0 <= nc < 8:
+                    attacked.add((nr, nc))
+                    
+        # Kung
+        elif piece == king_piece:
+            for dr in (-1, 0, 1):
+                for dc in (-1, 0, 1):
+                    if dr == 0 and dc == 0: continue
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < 8 and 0 <= nc < 8:
+                        attacked.add((nr, nc))
+                        
+        # Glidande pjäser (Torn, Löpare, Dam)
+        else:
+            dirs = []
+            if piece in rook_like:
+                dirs.extend(((-1, 0), (1, 0), (0, -1), (0, 1)))
+            if piece in bishop_like:
+                dirs.extend(((-1, -1), (-1, 1), (1, -1), (1, 1)))
+                
+            for dr, dc in dirs:
+                nr, nc = r + dr, c + dc
+                while 0 <= nr < 8 and 0 <= nc < 8:
+                    attacked.add((nr, nc))
+                    if board[nr][nc] != ' ':
+                        break
+                    nr += dr
+                    nc += dc
+                    
+    return attacked
+
+
+def is_king_safe(board, color, state, enemy_attacks):
+    """Kollar kungsäkerhet blixtsnabbt med hjälp av den färdiga hot-kartan."""
     king_pos = state.white_king_pos if color == 'white' else state.black_king_pos
     if king_pos is None:
         return False
 
     kr, kc = king_pos
-    enemy_color = 'black' if color == 'white' else 'white'
 
-    # 1. Om kungen står i schack just nu är den absolut inte säker
-    if is_check(board, color, state, king_pos):
+    # 1. Om kungen står i schack (dess ruta finns i hot-kartan)
+    if king_pos in enemy_attacks:
         return False
 
-    # 2. Kolla bondeskölden framför kungen (exempelvis raden framför)
-    # För vit är framför rad r-1, för svart rad r+1
+    # 2. Kolla bondeskölden framför kungen
     shield_row = kr - 1 if color == 'white' else kr + 1
     pawn_piece = '♙' if color == 'white' else '♟'
     
     pawn_shield_count = 0
     if 0 <= shield_row < 8:
-        # Kolla kolumnen till vänster, kungen, och till höger (3 rutor framför)
         for c_offset in (-1, 0, 1):
             nc = kc + c_offset
-            if 0 <= nc < 8:
-                if board[shield_row][nc] == pawn_piece:
-                    pawn_shield_count += 1
+            if 0 <= nc < 8 and board[shield_row][nc] == pawn_piece:
+                pawn_shield_count += 1
 
-    # 3. Räkna hur många rutor i kungens omedelbara 3x3-zon som är attackerade av fienden
+    # 3. Räkna rutor i 3x3-zonen som är attackerade av fienden
     threatened_squares = 0
     for dr in (-1, 0, 1):
         for dc in (-1, 0, 1):
@@ -248,14 +257,69 @@ def is_king_safe(board, color, state):
                 continue
             nr, nc = kr + dr, kc + dc
             if 0 <= nr < 8 and 0 <= nc < 8:
-                if _is_square_attacked_fast(board, nr, nc, enemy_color):
+                if (nr, nc) in enemy_attacks:
                     threatened_squares += 1
 
-    # En kung anses "säker" om den har minst 2 bönder i skölden 
-    # och inte har mer än 1 hotad ruta i sin närhet.
-    is_safe = (pawn_shield_count >= 2) and (threatened_squares <= 1)
-    return is_safe
+    return (pawn_shield_count >= 2) and (threatened_squares <= 1)
 
+
+def evaluate_pieces_and_threats(board, state, color, own_attacks, enemy_attacks):
+    """Utvärderar pjäser, hängande hot samt pjäser inställda i bondeslag."""
+    pst_score = 0.0
+    hanging_score = 0.0
+    
+    own_pieces = state.white_pieces if color == 'white' else state.black_pieces
+    king_piece = '♔' if color == 'white' else '♚'
+    enemy_color = 'black' if color == 'white' else 'white'
+    enemy_pawn = '♟' if color == 'white' else '♙'
+    pawn_dr = 1 if color == 'white' else -1  # Riktningen fiendebonden anfaller ifrån
+    
+    for r, c in own_pieces:
+        piece = board[r][c]
+        if piece == ' ':
+            continue
+        
+        # 1. PST-beräkning (Piece-Square Tables)
+        if color == 'white':
+            if piece == '♙': pst_score += PAWN_PST[r][c] * 0.01
+            elif piece == '♘': pst_score += KNIGHT_PST[r][c] * 0.01
+            elif piece == '♗': pst_score += BISHOP_PST[r][c] * 0.01
+            elif piece == '♖': pst_score += ROOK_PST[r][c] * 0.01
+            elif piece == '♕': pst_score += QUEEN_PST[r][c] * 0.01
+            elif piece == '♔': pst_score += KING_MG_PST[r][c] * 0.01
+        else:
+            sr = 7 - r
+            if piece == '♟': pst_score += PAWN_PST[sr][c] * 0.01
+            elif piece == '♞': pst_score += KNIGHT_PST[sr][c] * 0.01
+            elif piece == '♝': pst_score += BISHOP_PST[sr][c] * 0.01
+            elif piece == '♜': pst_score += ROOK_PST[sr][c] * 0.01
+            elif piece == '♛': pst_score += QUEEN_PST[sr][c] * 0.01
+            elif piece == '♚': pst_score += KING_MG_PST[sr][c] * 0.01
+
+        # 2. Hot- och säkerhetskontroller (hoppa över kungen)
+        if piece != king_piece:
+            val = abs(PIECE_VALUES.get(piece, 0))
+
+            # KOLL A: Står pjäsen i ett fientligt bondeslag?
+            # Om pjäsen är mer värd än en bonde (D, T, L, S) straffas den hårt
+            # även om den råkar ha ett eget försvar bakom sig!
+            is_attacked_by_pawn = False
+            pr = r + pawn_dr
+            if 0 <= pr < 8:
+                if (c - 1 >= 0 and board[pr][c - 1] == enemy_pawn) or \
+                   (c + 1 < 8 and board[pr][c + 1] == enemy_pawn):
+                    is_attacked_by_pawn = True
+
+            if is_attacked_by_pawn and val > 1:
+                # Straffa förlusten av pjäsen minus bondens värde (val - 1)
+                hanging_score -= (val - 1)
+            
+            # KOLL B: Helt oskyddad/hängande pjäs
+            elif (r, c) in enemy_attacks and (r, c) not in own_attacks:
+                hanging_score -= val
+
+    mult = 1.0 if color == 'white' else -1.0
+    return pst_score * mult, hanging_score * mult
 
 def is_wining_in_material(board, color):
     score = sum(PIECE_VALUES.get(p, 0) for row in board for p in row if p != ' ')

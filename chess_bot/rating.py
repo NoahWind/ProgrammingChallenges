@@ -145,6 +145,10 @@ def cant_even_mate(board, state):
 
     return False
 
+def _terminal_score(current_color, depth=0):
+    magnitude = 1_000_000 + depth
+    return -magnitude if current_color == 'white' else magnitude
+
 def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PARAMS):
     score = float(state.material_score)
 
@@ -153,9 +157,6 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
             and abs(state.material_score) < 5
             and not _has_any_pawns(board)):
         return 0 
-
-    # BORTTAGET: is_stalemate och cant_even_mate. De kräver för mycket beräkningskraft 
-    # på lövnivå och patt hanteras redan korrekt uppe i minimax-funktionen.
 
     # Hämta våra 3 vikter
     a, b, c = get_game_phase_weights(
@@ -168,18 +169,21 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
             score += (state.half_move_clock - 80) * 0.5 
         elif score > 0:
             score -= (state.half_move_clock - 80) * 0.5
+            
+    # ---------------------------------------------------------
+    # GENERERA HOT-KARTOR EN GÅNG PER NOD
+    # ---------------------------------------------------------
+    white_attacks = build_attack_map(board, 'white', state)
+    black_attacks = build_attack_map(board, 'black', state)
     
     # ---------------------------------------------------------
     # GRUPP 1: Öppning & Mittspel
     # ---------------------------------------------------------
-    if is_king_safe(board, 'white', state): score += ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
-    if is_king_safe(board, 'black', state): score -= ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
+    if is_king_safe(board, 'white', state, black_attacks): score += ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
+    if is_king_safe(board, 'black', state, white_attacks): score -= ENGINE_PARAMS["KING_SAFETY_BONUS"] * (a + b)
 
     if is_controling_center(board, 'white'): score += ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * (a + b)
     if is_controling_center(board, 'black'): score -= ENGINE_PARAMS["CONTROL_CENTER_BONUS"] * (a + b)
-
-    # BORTTAGET: Mobility / squares_controlled_bonus. 
-    # Att generera alla lagliga drag i löven är det som förstörde motorns hastighet.
 
     if knight_on_the_rim(board, 'white', state): score -= ENGINE_PARAMS["knight_on_the_rim_penalty"] * (a + b)
     if knight_on_the_rim(board, 'black', state): score += ENGINE_PARAMS["knight_on_the_rim_penalty"] * (a + b)
@@ -228,17 +232,14 @@ def evaluate_board(board, state, history, current_color, ENGINE_PARAMS=ENGINE_PA
     if pawn_chain(board, 'white', state): score += ENGINE_PARAMS["pawn_chain_bonus"]
     if pawn_chain(board, 'black', state): score -= ENGINE_PARAMS["pawn_chain_bonus"]
 
-    pst_w, hang_w = evaluate_pieces_and_threats(board, state, 'white')
-    pst_b, hang_b = evaluate_pieces_and_threats(board, state, 'black')
+    pst_w, hang_w = evaluate_pieces_and_threats(board, state, 'white', white_attacks, black_attacks)
+    pst_b, hang_b = evaluate_pieces_and_threats(board, state, 'black', black_attacks, white_attacks)
     score += pst_w * ENGINE_PARAMS["pieac_pos_bonus"]
     score += pst_b * ENGINE_PARAMS["pieac_pos_bonus"]
     score += hang_w * ENGINE_PARAMS["hanging_piece_penalty"]
     score += hang_b * ENGINE_PARAMS["hanging_piece_penalty"]
 
     return score
-# ==========================================
-# 3. SÖKMOTORN
-# ==========================================
 
 def quick_discard_move(board, move):
     """
@@ -275,51 +276,36 @@ def quick_discard_move(board, move):
                 
     return False
 
-
 def order_moves(moves, board, best_move=None):
-    def move_score(move):
+    scored_moves = []
+    
+    for move in moves:
         if move == best_move:
-            return 1000000
-
-        # Kasta ner dåliga drag längst ner i sorteringen
-        if quick_discard_move(board, move):
-            return -999999
-
-        (sr, sc), (er, ec) = move
-        captured = board[er][ec]
-        attacker = board[sr][sc]
-        
-        if captured == ' ' and attacker in ('♙', '♟') and sc != ec:
-            captured = '♟' if attacker == '♙' else '♙'
+            score = 1000000
+        elif quick_discard_move(board, move):
+            score = -999999
+        else:
+            (sr, sc), (er, ec) = move
+            captured = board[er][ec]
+            attacker = board[sr][sc]
             
-        if captured != ' ':
-            return 10 * abs(PIECE_VALUES.get(captured, 0)) - abs(PIECE_VALUES.get(attacker, 0))
-        return 0
+            # En passant-logik
+            if captured == ' ' and attacker in ('♙', '♟') and sc != ec:
+                captured = '♟' if attacker == '♙' else '♙'
+                
+            if captured != ' ':
+                # MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
+                score = 10 * abs(PIECE_VALUES.get(captured, 0)) - abs(PIECE_VALUES.get(attacker, 0))
+            else:
+                score = 0
+                
+        scored_moves.append((score, move))
 
-    moves.sort(key=move_score, reverse=True)
-    return moves
-
-def _is_capture_move(board, state, move):
-    """True om draget slår en pjäs eller förvandlar en bonde."""
-    (sr, sc), (er, ec) = move
-    if board[er][ec] != ' ':
-        return True
-        
-    piece = board[sr][sc]
-    # En passant
-    if piece in ('♙', '♟') and sc != ec and state.en_passant_target == (er, ec):
-        return True
-    # Bondeförvandling
-    if piece in ('♙', '♟') and (er == 0 or er == 7):
-        return True
-        
-    return False
-
-
-def _terminal_score(current_color, depth=0):
-
-    magnitude = 1_000_000 + depth
-    return -magnitude if current_color == 'white' else magnitude
+    # Pythons inbyggda sortering är blixtsnabb på tupler. 
+    # Den sorterar på score (index 0) i fallande ordning.
+    scored_moves.sort(key=lambda x: x[0], reverse=True)
+    
+    return [m[1] for m in scored_moves]
 
 """
 Förbättrad quiescence_search + hjälpfunktioner.

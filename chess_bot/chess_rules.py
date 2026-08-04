@@ -194,15 +194,10 @@ def add_pawn_moves(board, row, col, color, raw_moves, captures_only, state: Game
     nr = row + direction
     if 0 <= nr < 8:
         if board[nr][col] == ' ':
-            # Kolla om draget leder till sista raden (förvandling)
-            is_promotion = (nr == 0 or nr == 7)
-            
-            # Tillåt framryckning om vi antingen vill ha alla drag, 
-            # ELLER om vi bara vill ha captures men draget är en förvandling.
-            if not captures_only or is_promotion:
+            # Tillåt framryckning om vi vill ha alla drag ELLER om det är en förvandling
+            if not captures_only or (nr == 0 or nr == 7):
                 raw_moves.append(((row, col), (nr, col), False, False))
                 
-            # Dubbelsteg är aldrig förvandling, genereras bara när captures_only=False
             if not captures_only and row == start_row and board[row + 2 * direction][col] == ' ':
                 raw_moves.append(((row, col), (row + 2 * direction, col), False, False))
                 
@@ -211,12 +206,10 @@ def add_pawn_moves(board, row, col, color, raw_moves, captures_only, state: Game
             if 0 <= nc < 8 and board[nr][nc] in opp_set:
                 raw_moves.append(((row, col), (nr, nc), False, False))
 
-    # En passant
     if state.en_passant_target and row == er_row:
         tr, tc = state.en_passant_target
         if tr == nr and abs(tc - col) == 1:
             raw_moves.append(((row, col), (tr, tc), True, False))
-
 # ---------------------------------------------------------------------
 # Hot / schack (Behåll exakt som den är i din kod!)
 # ---------------------------------------------------------------------
@@ -287,9 +280,39 @@ def is_check(board, color, state: GameState, king_pos: Optional[Tuple[int, int]]
     return square_attacked(board, king_pos[0], king_pos[1], color)
 
 
-# ---------------------------------------------------------------------
-# Laglig-drag-generering (OPTIMERAD)
-# ---------------------------------------------------------------------
+def get_pinned_pieces(board, color, king_pos):
+    """Hittar pjäser som är bundna till kungen och returnerar en dictionary: 
+    {(rad, kolumn): (riktning_r, riktning_c)}"""
+    pinned = {}
+    if not king_pos: return pinned
+    kr, kc = king_pos
+    enemy_color = 'black' if color == 'white' else 'white'
+    
+    # Raka linjer (Torn/Dam) och Diagonaler (Löpare/Dam)
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+    
+    for dr, dc in directions:
+        pin_candidate = None
+        r, c = kr + dr, kc + dc
+        while 0 <= r < 8 and 0 <= c < 8:
+            p = board[r][c]
+            if p != ' ':
+                is_own_piece = (color == 'white' and p in WHITE_PIECES) or (color == 'black' and p in BLACK_PIECES)
+                if is_own_piece:
+                    if pin_candidate is None:
+                        pin_candidate = (r, c)
+                    else:
+                        break  # Två egna pjäser ivägen -> ingen bindning
+                else:
+                    is_orthogonal = (dr == 0 or dc == 0)
+                    if is_orthogonal and p in ({'♜','♛'} if enemy_color == 'black' else {'♖','♕'}):
+                        if pin_candidate: pinned[pin_candidate] = (dr, dc)
+                    elif not is_orthogonal and p in ({'♝','♛'} if enemy_color == 'black' else {'♗','♕'}):
+                        if pin_candidate: pinned[pin_candidate] = (dr, dc)
+                    break  # Fiendepjäs blockerar vidare sökning
+            r += dr
+            c += dc
+    return pinned
 def get_all_legal_moves(color, board, state: GameState, captures_only=False):
     own_pieces_set = state.white_pieces if color == 'white' else state.black_pieces
     own_pieces = WHITE_PIECES if color == 'white' else BLACK_PIECES
@@ -299,33 +322,47 @@ def get_all_legal_moves(color, board, state: GameState, captures_only=False):
         return []
 
     raw_moves = []
-
     for r, c in own_pieces_set:
         p = board[r][c]
-        if p in ('♙', '♟'):
-            add_pawn_moves(board, r, c, color, raw_moves, captures_only, state)
-        elif p in ('♖', '♜'):
-            _add_sliding_moves(board, r, c, own_pieces, _ROOK_DIRS, raw_moves, captures_only)
-        elif p in ('♘', '♞'):
-            add_knight_moves(board, r, c, color, raw_moves, captures_only)
-        elif p in ('♗', '♝'):
-            _add_sliding_moves(board, r, c, own_pieces, _BISHOP_DIRS, raw_moves, captures_only)
-        elif p in ('♕', '♛'):
-            _add_sliding_moves(board, r, c, own_pieces, _QUEEN_DIRS, raw_moves, captures_only)
-        elif p in ('♔', '♚'):
-            add_king_moves(board, r, c, color, raw_moves, captures_only, state)
+        if p in ('♙', '♟'): add_pawn_moves(board, r, c, color, raw_moves, captures_only, state)
+        elif p in ('♖', '♜'): _add_sliding_moves(board, r, c, own_pieces, _ROOK_DIRS, raw_moves, captures_only)
+        elif p in ('♘', '♞'): add_knight_moves(board, r, c, color, raw_moves, captures_only)
+        elif p in ('♗', '♝'): _add_sliding_moves(board, r, c, own_pieces, _BISHOP_DIRS, raw_moves, captures_only)
+        elif p in ('♕', '♛'): _add_sliding_moves(board, r, c, own_pieces, _QUEEN_DIRS, raw_moves, captures_only)
+        elif p in ('♔', '♚'): add_king_moves(board, r, c, color, raw_moves, captures_only, state)
 
     legal = []
-    for (sr, sc), (er, ec), is_ep, _is_castle in raw_moves:
-        record = apply_move(board, state, (sr, sc), (er, ec))
-        try:
-            cur_king_pos = (er, ec) if board[er][ec] in ('♔', '♚') else king_pos
-            in_check = is_check(board, color, state, cur_king_pos)
-        finally:
-            undo_move(board, state, record)
+    
+    # 1. Kolla om vi redan står i schack (måste göras en gång per nod)
+    in_check = is_check(board, color, state, king_pos)
+    
+    # 2. Hitta alla bundna pjäser (görs en gång per nod)
+    pinned_pieces = get_pinned_pieces(board, color, king_pos)
 
-        if not in_check:
-            legal.append(((sr, sc), (er, ec)))
+    for move in raw_moves:
+        (sr, sc), (er, ec), is_ep, is_castle = move
+        p = board[sr][sc]
+        is_king = p in ('♔', '♚')
+
+        # Om vi står i schack, eller flyttar kungen, eller gör en passant: gör full simulering
+        if in_check or is_king or is_ep:
+            record = apply_move(board, state, (sr, sc), (er, ec))
+            try:
+                cur_king_pos = (er, ec) if is_king else king_pos
+                if not is_check(board, color, state, cur_king_pos):
+                    legal.append(((sr, sc), (er, ec)))
+            finally:
+                undo_move(board, state, record)
+        else:
+            # Snabbt spår för pjäser som inte är inblandade i direkta kungsäkerhetsrisker!
+            if (sr, sc) in pinned_pieces:
+                pin_dr, pin_dc = pinned_pieces[(sr, sc)]
+                move_dr, move_dc = er - sr, ec - sc
+                # Kryssprodukten = 0 betyder att draget rör sig längs med bindningslinjen (vilket är lagligt)
+                if move_dr * pin_dc == move_dc * pin_dr:
+                    legal.append(((sr, sc), (er, ec)))
+            else:
+                legal.append(((sr, sc), (er, ec)))
 
     return legal
 
@@ -502,13 +539,13 @@ def undo_move(board, state: GameState, record):
         own_pieces.add((rfr, rfc))
 
 def get_position_hash(board, color, state):
-    """Skapar en unik nyckel för en ställning (bräde, tur, och state-rättigheter)."""
+    """Skapar en unik nyckel snabbare genom att konvertera brädet till en nästlad tupel."""
     state_key = (
         state.white_king_moved, state.black_king_moved,
         state.rook_a1_moved, state.rook_h1_moved,
         state.rook_a8_moved, state.rook_h8_moved,
         state.en_passant_target
     )
-    # Konverterar brädet till en tuple av tuples så att det är hashbart (immutable)
+    # En tuple av tuples skapas mycket snabbare internt i CPython än strängkonkatenering.
     board_tuple = tuple(tuple(row) for row in board)
-    return (board_tuple, color, state_key)
+    return hash((board_tuple, color, state_key))

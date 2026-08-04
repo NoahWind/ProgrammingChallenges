@@ -1,7 +1,7 @@
 from rating import *
 from rating import _terminal_score
 
-DELTA_MARGIN = 2
+DELTA_MARGIN = 0
 
 def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth=0, ENGINE_PARAMS=ENGINE_PARAMS):
     if time.time() - search_start_time > time_limit_seconds:
@@ -17,9 +17,7 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
             return _terminal_score(current_color, -q_depth)  # schackmatt
 
         # Ingen djupgräns-check här (q_depth >= 10) för schacksvar - forcerade
-        # sekvenser (schack -> schack -> schack ...) är sällan djupa i praktiken
-        # eftersom antalet lagliga svar oftast är litet, men vi sätter ändå
-        # ett hårt tak för säkerhets skull.
+        # sekvenser är sällan djupa i praktiken.
         if q_depth >= 16:
             return evaluate_board(board, state, history, current_color, ENGINE_PARAMS)
 
@@ -57,18 +55,16 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
 
     if is_maximizing:
         if stand_pat >= beta:
-            return beta
+            return stand_pat
         alpha = max(alpha, stand_pat)
     else:
         if stand_pat <= alpha:
-            return alpha
+            return stand_pat
         beta = min(beta, stand_pat)
 
     if q_depth >= 10:
         return stand_pat
 
-    # captures_only=True: genererar ENDAST slag-pseudodrag från början,
-    # istället för att räkna ut alla lagliga drag och sedan filtrera.
     capture_moves = get_all_legal_moves(current_color, board, state, captures_only=True)
     if not capture_moves:
         return stand_pat
@@ -76,6 +72,8 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
     capture_moves = order_moves(capture_moves, board)
 
     if is_maximizing:
+        best_val = stand_pat
+        
         for move in capture_moves:
             (sr, sc), (er, ec) = move
             moving_piece = board[sr][sc]
@@ -88,11 +86,10 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
             # Fånga En Passant (värd en bonde)
             elif moving_piece in ('♙', '♟') and captured == ' ' and sc != ec:
                 captured_val += 1
+                
             if stand_pat + captured_val + DELTA_MARGIN <= alpha:
                 continue
 
-            # SEE: hoppa över klart förlustaffärer (t.ex. Dxb2 mot en
-            # välförsvarad bonde) - de är i praktiken aldrig rätt i tyst läge.
             if static_exchange_eval(board, move) < 0:
                 continue
 
@@ -101,11 +98,19 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
                 eval_val = quiescence_search(board, state, alpha, beta, False, history, q_depth + 1, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
-            if eval_val >= beta:
-                return beta
-            alpha = max(alpha, eval_val)
-        return alpha
+            
+            if eval_val > best_val:
+                best_val = eval_val
+                
+            alpha = max(alpha, best_val)
+            if alpha >= beta:
+                break
+                
+        return best_val
+        
     else:
+        best_val = stand_pat
+        
         for move in capture_moves:
             (sr, sc), (er, ec) = move
             moving_piece = board[sr][sc]
@@ -118,6 +123,7 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
             # Fånga En Passant (värd en bonde)
             elif moving_piece in ('♙', '♟') and captured == ' ' and sc != ec:
                 captured_val += 1
+                
             if stand_pat - captured_val - DELTA_MARGIN >= beta:
                 continue
 
@@ -129,24 +135,15 @@ def quiescence_search(board, state, alpha, beta, is_maximizing, history, q_depth
                 eval_val = quiescence_search(board, state, alpha, beta, True, history, q_depth + 1, ENGINE_PARAMS)
             finally:
                 undo_move(board, state, record)
-            if eval_val <= alpha:
-                return alpha
-            beta = min(beta, eval_val)
-        return beta
-
-
-def get_position_hash(board, color, state):
-    """Skapar en unik nyckel för en ställning (bräde, tur, och state-rättigheter)."""
-    state_key = (
-        state.white_king_moved, state.black_king_moved,
-        state.rook_a1_moved, state.rook_h1_moved,
-        state.rook_a8_moved, state.rook_h8_moved,
-        state.en_passant_target
-    )
-    # Konverterar brädet till en tuple av tuples så att det är hashbart (immutable)
-    board_tuple = tuple(tuple(row) for row in board)
-    return (board_tuple, color, state_key)
-
+            
+            if eval_val < best_val:
+                best_val = eval_val
+                
+            beta = min(beta, best_val)
+            if beta <= alpha:
+                break
+                
+        return best_val
 def minimax(board, state, depth, alpha, beta, is_maximizing, history, local_cache, ENGINE_PARAMS=ENGINE_PARAMS):
     if time.time() - search_start_time > time_limit_seconds:
         raise TimeoutError()
@@ -280,21 +277,30 @@ def get_best_move(board, depth, color, state, history=None, params=None, DEFAULT
                 finally:
                     undo_move(board, state, record)
 
+                # -------- RÄTT INDENTERING HÄR --------
+                # Denna if-sats måste vara inuti for-loopen!
                 if color == 'white':
                     if move_value > best_value_for_this_depth:
                         best_value_for_this_depth = move_value
                         best_move_for_this_depth = move
+                        # LÖSNING: Spara omedelbart ifall tiden tar slut i nästa sekund!
+                        best_move_overall = move
+                        best_value = move_value
                     alpha = max(alpha, move_value)
                 else:
                     if move_value < best_value_for_this_depth:
                         best_value_for_this_depth = move_value
                         best_move_for_this_depth = move
+                        # LÖSNING: Spara omedelbart ifall tiden tar slut i nästa sekund!
+                        best_move_overall = move
+                        best_value = move_value
                     beta = min(beta, move_value)
+                # --------------------------------------
 
+            # Denna uppdatering ligger korrekt utanför loopen
             if best_move_for_this_depth is not None:
                 best_move_overall = best_move_for_this_depth
                 best_value = best_value_for_this_depth
-
     except TimeoutError:
         print("Tiden tog slut – använder resultat från föregående färdiga djup.")
     
@@ -302,5 +308,8 @@ def get_best_move(board, depth, color, state, history=None, params=None, DEFAULT
     print("Cache size:", len(local_cache), "entries")
     print("in MB:", len(local_cache) * 64 / (1024 * 1024))
     print("Best move found:", best_move_overall, "with evaluation:", best_value)
+
+    #Print eval of the move played
+    print("Evaluation of the best move played:", best_value)
     
     return best_move_overall

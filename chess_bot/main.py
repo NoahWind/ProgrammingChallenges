@@ -425,7 +425,7 @@ def main():
         "bishop_pair_bonus": 0.3,          # Bonus för att ha båda löparna kvar
         "enemy_king_center_bonus": 0.2,    # Hjälper till att driva kungen i slutspelet
         "enemy_king_corner_bonus": 0.35,   # Belönar att tränga kungen mot kanten för matt
-        "hanging_piece_penalty": 100.0,      # Straffar hängande pjäser hårt
+        "hanging_piece_penalty": 1.0,      # Straffar hängande pjäser hårt
         "isolated_pawn_penalty": 0.15,    # Straff för svaga, isolerade bönder
         "knight_on_the_rim_penalty": 0.15, # Straffar springare på kanten ("knight on the rim is dim")
         "pawn_chain_bonus": 0.1,           # Belönar starka bondekedjor
@@ -437,7 +437,7 @@ def main():
 
 
 
-    play_game_self_play("8/6k1/8/8/5K2/P7/8/8 w - - 0 1", best_params, best_params, num_games=1, default_time_limit_seconds=THINKING_TIME)
+    play_game_self_play("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", best_params, best_params, num_games=1, default_time_limit_seconds=THINKING_TIME)
 
 
 if __name__ == "__main__":
