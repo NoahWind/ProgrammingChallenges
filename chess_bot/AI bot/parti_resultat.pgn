@@ -1,0 +1,9 @@
+[Event "Bot Test Match"]
+[Site "Local Python Environment"]
+[Date "2026.08.18"]
+[Round "?"]
+[White "ChessNNUE Bot"]
+[Black "Stockfish (Depth 4)"]
+[Result "0-1"]
+
+1. c4 e5 2. g3 d5 3. cxd5 Qxd5 4. Nf3 Qe6 5. Bg2 Nc6 6. Nc3 Nf6 7. O-O Bd6 8. b4 Bxb4 9. Nb5 Ba5 10. Ba3 a6 11. Nxc7+ Bxc7 12. Ng5 Qg4 13. Rc1 Qxg5 14. Bxc6+ bxc6 15. Rxc6 Bd8 16. Qb3 Qxd2 17. Rd6 Qa5 18. Bb4 Qc7 19. Rxf6 Bxf6 20. Rd1 Bf5 21. g4 Be6 22. Qa3 Bd7 23. Rc1 Qb7 24. h3 Qb6 25. Bc5 Qe6 26. Rd1 Be7 27. Bxe7 Qxe7 28. Qe3 Rd8 29. Rd5 f6 30. Qb6 a5 31. Rxa5 Rc8 32. Qb7 Qd8 33. Ra7 Rf8 34. Qb1 g6 35. h4 Rf7 36. Qb3 Rf8 37. h5 gxh5 38. gxh5 e4 39. Kg2 Qe7 40. Qd5 Qe6 41. Qxe6+ Bxe6 42. f4 Rf7 43. Ra4 Bf5 44. Kf2 Kf8 45. Ra5 Be6 46. Ra6 Bd7 47. Ke3 Re8 48. Ra7 f5 49. a4 Kg8 50. Ra5 h6 51. Ra6 Be6 52. Rc6 Rd7 53. Rb6 Rc7 54. Rc6 Rxc6 55. a5 Rcc8 56. Kf2 Ra8 57. a6 Bc4 58. Kg1 e3 59. Kf1 Re4 60. Kg2 Re6 61. Kf3 Rexa6 62. Kxe3 Ra3+ 63. Kd4 R3a7 64. Kc3 Bf7 65. e3 Ra3+ 66. Kb4 R3a5 67. Kc3 Ra3+ 68. Kb2 Rxe3 69. Kc1 Re4 70. Kd2 Rd8+ 71. Kc2 Kf8 72. Kb1 Rb4+ 73. Kc2 Rc4+ 74. Kb3 Rxf4+ 75. Kc2 Rc4+ 76. Kb3 Rb8+ 77. Ka3 f4 78. Ka2 Ra4# 0-1

@@ -108,20 +108,32 @@ class ChessEvaluatorNN(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-def save_model(model: nn.Module, path: str = "chess_nnue.pth") -> None:
-    torch.save(model.state_dict(), path)
+def save_model(model: nn.Module, path: str = "chess_nnue.pth", optimizer=None, scheduler=None) -> None:
+    state = {"model_state_dict": model.state_dict()}
+    if optimizer is not None:
+        state["optimizer_state_dict"] = optimizer.state_dict()
+    if scheduler is not None:
+        state["scheduler_state_dict"] = scheduler.state_dict()
+    torch.save(state, path)
 
 
-def load_model(model: nn.Module, path: str = "chess_nnue.pth", device: str = "cpu") -> bool:
-    """Laddar sparade vikter in i `model` om filen finns. Returnerar True/False."""
+def load_model(model: nn.Module, path: str = "chess_nnue.pth", device: str = "cpu", optimizer=None, scheduler=None) -> bool:
+    """Laddar sparade vikter, optimizer och scheduler om filen finns. Returnerar True/False."""
     if os.path.exists(path):
-        state_dict = torch.load(path, map_location=device)
-        model.load_state_dict(state_dict)
-        print(f"[nn_model] Laddade sparade modellvikter från '{path}'")
+        checkpoint = torch.load(path, map_location=device)
+        if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
+            model.load_state_dict(checkpoint["model_state_dict"])
+            if optimizer is not None and "optimizer_state_dict" in checkpoint:
+                optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            if scheduler is not None and "scheduler_state_dict" in checkpoint:
+                scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+        else:
+            # Bakåtkompatibilitet om filen enbart sparats som ren state_dict
+            model.load_state_dict(checkpoint)
+        print(f"[nn_model] Laddade sparade modellvikter och states från '{path}'")
         return True
     print(f"[nn_model] Ingen sparad modell hittades vid '{path}' -- startar med slumpade vikter.")
     return False
-
 
 # ---------------------------------------------------------------------------
 # Stockfish score -> träningsmål
